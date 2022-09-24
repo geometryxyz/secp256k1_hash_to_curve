@@ -217,6 +217,25 @@ describe('ExpandMessageXmd', () => {
         }
         expect(bits.join('')).toEqual(b2_bits.join(''))
     })
+
+    it('ExpandMessageXmd', async () => {
+        const circuit = 'expand_msg_xmd_test'
+        const circuitInputs = stringifyBigInts({ msg })
+
+        const witness = await genWitness(circuit, circuitInputs)
+
+        const bytes: number[] = []
+        for (let i = 0; i < 96; i ++) {
+            const out = Number(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            bytes.push(out)
+        }
+
+        const expected = expected_b1.concat(expected_b2).concat(expected_b3)
+        expect(expected.length).toEqual(bytes.length)
+        for (let i = 0; i < 96; i ++) {
+            expect(bytes[i]).toEqual(expected[i])
+        }
+    })
 })
 
 const strxor = (a: number[], b: number[]): number[] => {
