@@ -87,3 +87,37 @@ template HashMsgPrimeToB0(msg_length) {
         hash[i] <== hasher.out[i];
     }
 }
+
+template HashB0ToB1() {
+    signal input b0_bits[256];
+    signal output b1_bits[256];
+
+    var num_preimage_bits = 256 + 8 + (50 * 8);
+    component hasher = Sha256(num_preimage_bits);
+    for (var i = 0; i < 32; i ++) {
+        for (var j = 0; j < 8; j ++) {
+            hasher.in[i * 8 + (j)] <== b0_bits[i * 8 + (j)];
+        }
+    }
+    hasher.in[256 + 0] <== 0;
+    hasher.in[256 + 1] <== 0;
+    hasher.in[256 + 2] <== 0;
+    hasher.in[256 + 3] <== 0;
+    hasher.in[256 + 4] <== 0;
+    hasher.in[256 + 5] <== 0;
+    hasher.in[256 + 6] <== 0;
+    hasher.in[256 + 7] <== 1;
+
+    var dst_prime[50] = get_dst_prime();
+    component n2b[50];
+    for (var i = 0; i < 50; i ++) {
+        n2b[i] = Num2Bits(8);
+        n2b[i].in <== dst_prime[i];
+        for (var j = 0; j < 8; j ++) {
+            hasher.in[256 + 8 + (i * 8) + (j)] <== n2b[i].out[7 - j];
+        }
+    }
+    for (var i = 0; i < 256; i ++) {
+        b1_bits[i] <== hasher.out[i];
+    }
+}
