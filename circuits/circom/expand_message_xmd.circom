@@ -89,25 +89,47 @@ template HashMsgPrimeToB0(msg_length) {
     }
 }
 
-template HashB0ToB1() {
+template HashBi(b_idx) {
     signal input b0_bits[256];
-    signal output b1_bits[256];
+    signal input bi_minus_one_bits[256];
+    signal output bi_bits[256];
+
+    component strxor = StrXor(256);
+    component hashb = HashB(b_idx);
+
+    for (var i = 0; i < 256; i ++) {
+        strxor.a[i] <== b0_bits[i];
+        strxor.b[i] <== bi_minus_one_bits[i];
+    }
+
+    for (var i = 0; i < 256; i ++) {
+        hashb.b_bits[i] <== strxor.out[i];
+    }
+
+    for (var i = 0; i < 256; i ++) {
+        bi_bits[i] <== hashb.bi_bits[i];
+    }
+}
+
+template HashB(b_idx) {
+    assert(b_idx < 8);
+
+    signal input b_bits[256];
+    signal output bi_bits[256];
 
     var num_preimage_bits = 256 + 8 + (50 * 8);
     component hasher = Sha256(num_preimage_bits);
     for (var i = 0; i < 32; i ++) {
         for (var j = 0; j < 8; j ++) {
-            hasher.in[i * 8 + (j)] <== b0_bits[i * 8 + (j)];
+            hasher.in[i * 8 + (j)] <== b_bits[i * 8 + (j)];
         }
     }
-    hasher.in[256 + 0] <== 0;
-    hasher.in[256 + 1] <== 0;
-    hasher.in[256 + 2] <== 0;
-    hasher.in[256 + 3] <== 0;
-    hasher.in[256 + 4] <== 0;
-    hasher.in[256 + 5] <== 0;
-    hasher.in[256 + 6] <== 0;
-    hasher.in[256 + 7] <== 1;
+
+    component digit_n2b = Num2Bits(8);
+    digit_n2b.in <== b_idx;
+    for (var i = 0; i < 8; i ++) {
+        hasher.in[256 + i] <== digit_n2b.out[7 - i];
+    }
 
     var dst_prime[50] = get_dst_prime();
     component n2b[50];
@@ -119,7 +141,7 @@ template HashB0ToB1() {
         }
     }
     for (var i = 0; i < 256; i ++) {
-        b1_bits[i] <== hasher.out[i];
+        bi_bits[i] <== hasher.out[i];
     }
 }
 

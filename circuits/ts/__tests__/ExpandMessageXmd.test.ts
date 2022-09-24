@@ -48,63 +48,17 @@ describe('ExpandMessageXmd', () => {
         81, 208
     ]
 
-    // Test the MsgPrime circuit
-    it('msg_prime', async () => {
-        const circuit = 'msg_prime_test'
-        const circuitInputs = stringifyBigInts({ msg })
+    const expected_b2 = [
+        197, 77, 255, 208, 84, 39, 78, 219, 36, 136, 85, 230, 17, 144, 196, 98,
+        167, 187, 97, 236, 186, 142, 64, 10, 154, 118, 213, 174, 1, 78, 135,
+        255
+    ]
 
-        const witness = await genWitness(circuit, circuitInputs)
-        for (let i = 0; i < 120; i ++) {
-            const out = Number(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            expect(out).toEqual(expected_msg_prime[i])
-        }
-    })
-
-    // Hash msg_prime with SHA256
-    it('b0 = h(msg_prime)', async () => {
-        const buff = Buffer.from(expected_msg_prime)
-        const hash = crypto.createHash("sha256").update(buff).digest()
-
-        for (let i = 0; i < 32; i ++) {
-            expect(hash[i]).toEqual(expected_b0[i])
-        }
-        
-        const circuitInputs = stringifyBigInts({ msg_prime: expected_msg_prime })
-
-        const hash_bits = buffer2bitArray(hash)
-        expect(hash_bits.join('')).toEqual(expected_hash_b0_bits.join(''))
-
-        const circuit = 'hash_msg_prime_to_b0_test'
-        const witness = await genWitness(circuit, circuitInputs)
-
-        const bits: number[] = []
-        for (let i = 0; i < 256; i ++) {
-            const out = Number(await getSignalByName(circuit, witness, 'main.hash[' + i.toString() + ']'))
-            bits.push(out)
-        }
-        expect(bits.join('')).toEqual(hash_bits.join(''))
-        //console.log(bits.join(''))
-    })
-
-    it('b1 = h(b0 || 1 || dst_prime)', async () => {
-        const buff = Buffer.from(expected_b0.concat([1]).concat(dst_prime))
-        const hash = crypto.createHash("sha256").update(buff).digest()
-        for (let i = 0; i < 32; i ++) {
-            expect(hash[i]).toEqual(expected_b1[i])
-        }
-        const b0_bits = buffer2bitArray(expected_b0)
-        const circuitInputs = stringifyBigInts({ b0_bits })
-        const circuit = 'hash_b0_to_b1_test'
-        const witness = await genWitness(circuit, circuitInputs)
-
-        const b1_bits = buffer2bitArray(hash)
-        const bits: number[] = []
-        for (let i = 0; i < 256; i ++) {
-            const out = Number(await getSignalByName(circuit, witness, 'main.b1_bits[' + i.toString() + ']'))
-            bits.push(out)
-        }
-        expect(bits.join('')).toEqual(b1_bits.join(''))
-    })
+    const expected_b3 = [
+        88, 151, 182, 93, 163, 181, 149, 168, 19, 208, 253, 203, 206, 13, 49,
+        111, 118, 108, 238, 235, 111, 248, 76, 222, 204, 214, 155, 224, 231,
+        179, 153, 209
+    ]
 
     it('sha256 bit order test', async () => {
         const expected_output = 
@@ -160,13 +114,118 @@ describe('ExpandMessageXmd', () => {
         const witness = await genWitness(circuit, circuitInputs)
         const result: number[] = []
         for (let i = 0; i < 8; i ++) {
-            //console.log(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
             const out = Number(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
             result.push(out)
         }
         expect(result.join('')).toEqual(expected_out.join(''))
     })
+
+    // Test the MsgPrime circuit
+    it('msg_prime', async () => {
+        const circuit = 'msg_prime_test'
+        const circuitInputs = stringifyBigInts({ msg })
+
+        const witness = await genWitness(circuit, circuitInputs)
+        for (let i = 0; i < 120; i ++) {
+            const out = Number(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            expect(out).toEqual(expected_msg_prime[i])
+        }
+    })
+
+    // Hash msg_prime with SHA256
+    it('b0 = h(msg_prime)', async () => {
+        const buff = Buffer.from(expected_msg_prime)
+        const hash = crypto.createHash("sha256").update(buff).digest()
+
+        for (let i = 0; i < 32; i ++) {
+            expect(hash[i]).toEqual(expected_b0[i])
+        }
+        
+        const circuitInputs = stringifyBigInts({ msg_prime: expected_msg_prime })
+
+        const hash_bits = buffer2bitArray(hash)
+        expect(hash_bits.join('')).toEqual(expected_hash_b0_bits.join(''))
+
+        const circuit = 'hash_msg_prime_to_b0_test'
+        const witness = await genWitness(circuit, circuitInputs)
+
+        const bits: number[] = []
+        for (let i = 0; i < 256; i ++) {
+            const out = Number(await getSignalByName(circuit, witness, 'main.hash[' + i.toString() + ']'))
+            bits.push(out)
+        }
+        expect(bits.join('')).toEqual(hash_bits.join(''))
+        //console.log(bits.join(''))
+    })
+
+    it('b1 = h(b0 || 1 || dst_prime)', async () => {
+        const buff = Buffer.from(expected_b0.concat([1]).concat(dst_prime))
+        const hash = crypto.createHash("sha256").update(buff).digest()
+        for (let i = 0; i < 32; i ++) {
+            expect(hash[i]).toEqual(expected_b1[i])
+        }
+        const b_bits = buffer2bitArray(expected_b0)
+        const circuitInputs = stringifyBigInts({ b_bits })
+        const circuit = 'hash_b0_to_b1_test'
+        const witness = await genWitness(circuit, circuitInputs)
+
+        const b1_bits = buffer2bitArray(hash)
+        const bits: number[] = []
+        for (let i = 0; i < 256; i ++) {
+            const out = Number(await getSignalByName(circuit, witness, 'main.bi_bits[' + i.toString() + ']'))
+            bits.push(out)
+        }
+        expect(bits.join('')).toEqual(b1_bits.join(''))
+    })
+
+    it('b2 = h(strxor(b0, b1) || 2 || dst_prime)', async () => {
+        const buff = Buffer.from(strxor(expected_b0, expected_b1).concat([2]).concat(dst_prime))
+        const hash = crypto.createHash("sha256").update(buff).digest()
+        for (let i = 0; i < 32; i ++) {
+            expect(hash[i]).toEqual(expected_b2[i])
+        }
+        const b0_bits = buffer2bitArray(expected_b0)
+        const bi_minus_one_bits = buffer2bitArray(expected_b1)
+        const circuitInputs = stringifyBigInts({ b0_bits, bi_minus_one_bits })
+        const circuit = 'hash_b1_to_b2_test'
+        const witness = await genWitness(circuit, circuitInputs)
+        const b2_bits = buffer2bitArray(hash)
+        const bits: number[] = []
+        for (let i = 0; i < 256; i ++) {
+            const out = Number(await getSignalByName(circuit, witness, 'main.bi_bits[' + i.toString() + ']'))
+            bits.push(out)
+        }
+        expect(bits.join('')).toEqual(b2_bits.join(''))
+    })
+
+    it('b3 = h(strxor(b0, b2) || 3 || dst_prime)', async () => {
+        const buff = Buffer.from(strxor(expected_b0, expected_b2).concat([3]).concat(dst_prime))
+        const hash = crypto.createHash("sha256").update(buff).digest()
+        for (let i = 0; i < 32; i ++) {
+            expect(hash[i]).toEqual(expected_b3[i])
+        }
+        const b0_bits = buffer2bitArray(expected_b0)
+        const bi_minus_one_bits = buffer2bitArray(expected_b2)
+        const circuitInputs = stringifyBigInts({ b0_bits, bi_minus_one_bits })
+        const circuit = 'hash_b2_to_b3_test'
+        const witness = await genWitness(circuit, circuitInputs)
+        const b2_bits = buffer2bitArray(hash)
+        const bits: number[] = []
+        for (let i = 0; i < 256; i ++) {
+            const out = Number(await getSignalByName(circuit, witness, 'main.bi_bits[' + i.toString() + ']'))
+            bits.push(out)
+        }
+        expect(bits.join('')).toEqual(b2_bits.join(''))
+    })
 })
+
+const strxor = (a: number[], b: number[]): number[] => {
+    const result: number[] = []
+    for (let i = 0; i < a.length; i ++) {
+        result.push(a[i] ^ b[i])
+    }
+    return result
+}
 
 function buffer2bitArray(b) {
     const res: number[] = [];
