@@ -1,6 +1,7 @@
 pragma circom 2.0.0;
 include "../node_modules/circomlib/circuits/sha256/sha256.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
+include "../node_modules/circomlib/circuits/gates.circom";
 
 function get_dst_prime() {
     var dst_prime[50] = [
@@ -119,5 +120,33 @@ template HashB0ToB1() {
     }
     for (var i = 0; i < 256; i ++) {
         b1_bits[i] <== hasher.out[i];
+    }
+}
+
+template StrXor(n) {
+    // TODO: For safety, should the inputs be constrained to be 0 <= n <= 255?
+    signal input a[n];
+    signal input b[n];
+    signal output out[n];
+
+    component xor[n][8];
+    component n2b_a[n];
+    component n2b_b[n];
+    component b2n[n];
+    for (var i = 0; i < n; i ++) {
+        n2b_a[i] = Num2Bits(8);
+        n2b_a[i].in <== a[i];
+        n2b_b[i] = Num2Bits(8);
+        n2b_b[i].in <== b[i];
+        b2n[i] = Bits2Num(8);
+        for (var j = 0; j < 8; j ++) {
+            xor[i][j] = XOR();
+            xor[i][j].a <== n2b_a[i].out[j];
+            xor[i][j].b <== n2b_b[i].out[j];
+            b2n[i].in[j] <== xor[i][j].out;
+        }
+    }
+    for (var i = 0; i < n; i ++) {
+        out[i] <== b2n[i].out;
     }
 }

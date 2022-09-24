@@ -146,6 +146,26 @@ describe('ExpandMessageXmd', () => {
         }
         expect(bits.join('')).toEqual(expected_output)
     })
+
+    it('strxor test', async () => {
+        const a = [0, 10, 20, 30, 40, 50, 60, 70]
+        const b = [255, 254, 253, 252, 251, 250, 249, 248]
+        const expected_out: number[] =  [255, 244, 233, 226, 211, 200, 197, 190]
+        for (let i = 0; i < a.length; i ++) {
+            expect(a[i] ^ b[i]).toEqual(expected_out[i])
+        }
+
+        const circuit = 'strxor_test'
+        const circuitInputs = stringifyBigInts({ a, b })
+        const witness = await genWitness(circuit, circuitInputs)
+        const result: number[] = []
+        for (let i = 0; i < 8; i ++) {
+            //console.log(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            const out = Number(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            result.push(out)
+        }
+        expect(result.join('')).toEqual(expected_out.join(''))
+    })
 })
 
 function buffer2bitArray(b) {
