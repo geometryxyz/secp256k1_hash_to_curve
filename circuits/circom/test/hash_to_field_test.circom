@@ -1,5 +1,5 @@
 pragma circom 2.0.0;
 
-include "../expand_message_xmd.circom";
+include "../hash_to_field.circom";
 
 component main = HashToField(3);

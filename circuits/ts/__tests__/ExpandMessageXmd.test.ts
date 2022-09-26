@@ -208,20 +208,6 @@ describe('ExpandMessageXmd', () => {
             expect(bytes[i]).toEqual(expected[i])
         }
     })
- 
-    it('BytesToRegisters', async () => {
-        const circuit = 'bytes_to_registers_test'
-        const bytes: number[] = []
-        for (let i = 0; i < 48; i ++) {
-            bytes.push(255)
-        }
-        const circuitInputs = stringifyBigInts({ bytes })
-        const witness = await genWitness(circuit, circuitInputs)
-        for (let i = 0; i < 4; i ++) {
-            const out = BigInt(await getSignalByName(circuit, witness, 'main.registers[' + i.toString() + ']'))
-            expect(out).toEqual(BigInt('18446744073709551615'))
-        }
-    })
 
     it('HashToField', async () => {
         const circuit = 'hash_to_field_test'
@@ -243,9 +229,29 @@ describe('ExpandMessageXmd', () => {
             expect(out).toEqual(expected_u1_registers[i])
         }
     })
+ 
+    const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F')
+    it('BytesToRegisters (all bytes are 255)', async () => {
+        const circuit = 'bytes_to_registers_test'
+        const bytes: number[] = []
+        for (let i = 0; i < 48; i ++) {
+            bytes.push(255)
+        }
 
-    it('BytesToRegisters', async () => {
-        const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F')
+        const expected_registers = bigint_to_array(
+            64,
+            4,
+            BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff') % p
+        )
+        const circuitInputs = stringifyBigInts({ bytes })
+        const witness = await genWitness(circuit, circuitInputs)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            expect(out).toEqual(expected_registers[i])
+        }
+    })
+
+    it('BytesToRegisters (for u0)', async () => {
         const bytes = [
             232, 52, 124, 173, 72, 171, 78, 49, 157, 123, 39, 85, 32, 234, 129,
             207, 18, 138, 171, 93, 54, 121, 161, 247, 96, 30, 59, 222, 172,
@@ -282,6 +288,7 @@ function buffer2bitArray(b) {
     return res;
 }
 
+// From circom-ecdsa
 function bigint_to_tuple(x: bigint) {
     let mod: bigint = BigInt('18446744073709551616')
     let ret: [bigint, bigint, bigint, bigint] = [
