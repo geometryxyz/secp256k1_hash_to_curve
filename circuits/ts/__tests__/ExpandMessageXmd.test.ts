@@ -60,46 +60,19 @@ describe('ExpandMessageXmd', () => {
         179, 153, 209
     ]
 
-    it('sha256 bit order test', async () => {
-        const expected_output = 
-            '0011001010111010010001110110011101110001110100000001111000110111' +
-            '1000000001111001100100001110101011011000011100011001111100001000' +
-            '1010111101001001010001110010001111011110000111010010001010001111' +
-            '0010110000101100000001111100110000001010101001000000101110101100'
-        const input_bits: number[] = []
-        for (let i = 0; i < 256; i ++) {
-            input_bits.push(0)
-        }
-        input_bits[255] = 1
+    const expected_u0_registers = [
+        BigInt('5220784225879993185'),
+        BigInt('4488152950487114122'),
+        BigInt('6926039108402729460'),
+        BigInt('1336068656303022583'),
+    ]
 
-        const bits_to_bytes = (bits: number[]): number[] => {
-            const bytes: number[] = []
-            for (let i = 0; i < 32; i ++) {
-                let byte_str = '0b'
-                for (let j = 0; j < 8; j ++) {
-                    byte_str += bits[i * 8 + j]
-                }
-                bytes.push(Number(byte_str))
-            }
-            return bytes
-        }
-
-        const input_bytes = bits_to_bytes(input_bits)
-
-        const first_hash = crypto.createHash('sha256').update(Buffer.from(input_bytes)).digest()
-        const second_hash = crypto.createHash('sha256').update(Buffer.from(first_hash)).digest()
-        expect(buffer2bitArray(second_hash).join('')).toEqual(expected_output)
-
-        const circuit = 'sha256_bit_order_test'
-        const circuitInputs = stringifyBigInts({ 'in': input_bits })
-        const witness = await genWitness(circuit, circuitInputs)
-        const bits: number[] = []
-        for (let i = 0; i < 256; i ++) {
-            const out = Number(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            bits.push(out)
-        }
-        expect(bits.join('')).toEqual(expected_output)
-    })
+    const expected_u1_registers = [
+        BigInt('5596462452035853824'),
+        BigInt('5988634572027431684'),
+        BigInt('1427920136467682780'),
+        BigInt('6383771510115767720'),
+    ]
 
     it('strxor test', async () => {
         const a = [0, 10, 20, 30, 40, 50, 60, 70]
@@ -155,7 +128,6 @@ describe('ExpandMessageXmd', () => {
             bits.push(out)
         }
         expect(bits.join('')).toEqual(hash_bits.join(''))
-        //console.log(bits.join(''))
     })
 
     it('b1 = h(b0 || 1 || dst_prime)', async () => {
@@ -236,6 +208,60 @@ describe('ExpandMessageXmd', () => {
             expect(bytes[i]).toEqual(expected[i])
         }
     })
+ 
+    it('BytesToRegisters', async () => {
+        const circuit = 'bytes_to_registers_test'
+        const bytes: number[] = []
+        for (let i = 0; i < 48; i ++) {
+            bytes.push(255)
+        }
+        const circuitInputs = stringifyBigInts({ bytes })
+        const witness = await genWitness(circuit, circuitInputs)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.registers[' + i.toString() + ']'))
+            expect(out).toEqual(BigInt('18446744073709551615'))
+        }
+    })
+
+    it('HashToField', async () => {
+        const circuit = 'hash_to_field_test'
+        const circuitInputs = stringifyBigInts({ msg })
+        const witness = await genWitness(circuit, circuitInputs)
+
+        // u0
+        const u0_registers: bigint[] = []
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.u[0][' + i.toString() + ']'))
+            u0_registers.push(out)
+            expect(out).toEqual(expected_u0_registers[i])
+        }
+        // u1
+        const u1_registers: bigint[] = []
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.u[1][' + i.toString() + ']'))
+            u1_registers.push(out)
+            expect(out).toEqual(expected_u1_registers[i])
+        }
+    })
+
+    it('BytesToRegisters', async () => {
+        const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F')
+        const bytes = [
+            232, 52, 124, 173, 72, 171, 78, 49, 157, 123, 39, 85, 32, 234, 129,
+            207, 18, 138, 171, 93, 54, 121, 161, 247, 96, 30, 59, 222, 172,
+            154, 81, 208, 197, 77, 255, 208, 84, 39, 78, 219, 36, 136, 85, 230,
+            17, 144, 196, 98
+        ]
+
+        const circuit = 'bytes_to_registers_test'
+        const circuitInputs = stringifyBigInts({ bytes: bytes })
+        const witness = await genWitness(circuit, circuitInputs)
+        const registers: bigint[] = []
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            expect(out.toString()).toEqual(expected_u0_registers[i].toString())
+        }
+    })
 })
 
 const strxor = (a: number[], b: number[]): number[] => {
@@ -254,4 +280,36 @@ function buffer2bitArray(b) {
         }
     }
     return res;
+}
+
+function bigint_to_tuple(x: bigint) {
+    let mod: bigint = BigInt('18446744073709551616')
+    let ret: [bigint, bigint, bigint, bigint] = [
+        BigInt(0),
+        BigInt(0),
+        BigInt(0),
+        BigInt(0),
+    ];
+
+    var x_temp: bigint = x;
+    for (var idx = 0; idx < ret.length; idx++) {
+        ret[idx] = x_temp % mod;
+        x_temp = x_temp / mod;
+    }
+    return ret;
+}
+
+function bigint_to_array(n: number, k: number, x: bigint) {
+    let mod: bigint = BigInt(1);
+    for (var idx = 0; idx < n; idx++) {
+        mod = mod * BigInt(2);
+    }
+
+    let ret: bigint[] = [];
+    var x_temp: bigint = x;
+    for (var idx = 0; idx < k; idx++) {
+        ret.push(x_temp % mod);
+        x_temp = x_temp / mod;
+    }
+    return ret;
 }

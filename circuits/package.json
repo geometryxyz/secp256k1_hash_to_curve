@@ -12,6 +12,8 @@
   "dependencies": {
     "circom-helper": "^0.3.3",
     "circomlib": "2.0.5",
+    "circom-ecdsa": "git://github.com/0xPARC/circom-ecdsa.git#d87eb7068cb35c951187093abe966275c1839ead",
+    "circomlib": "git://github.com/weijiekoh/circomlib.git#ac85e82c1914d47789e2032fb11ceb2cfdd38a2b",
     "snarkjs": "^0.5.0"
   },
   "devDependencies": {
