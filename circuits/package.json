@@ -4,8 +4,11 @@
   "description": "circom circuits for the secp256k1_XMD:SHA-256_SSWU_RO_ hash-to-curve algorithm",
   "scripts": {
     "circom-helper": "circom-helper -c ./circomHelperConfig.json -b ./build/test/ -p 9001 -nc",
+        "test": "jest",
         "test-expandMessageXmd": "jest ExpandMessageXmd.test.ts",
-        "test-expandMessageXmd-debug": "node --inspect-brk ./node_modules/.bin/jest ExpandMessageXmd.test.ts"
+        "test-expandMessageXmd-debug": "node --inspect-brk ./node_modules/.bin/jest ExpandMessageXmd.test.ts",
+        "test-hashToField": "jest HashToField.test.ts",
+        "test-hashToField-debug": "node --inspect-brk ./node_modules/.bin/jest HashToField.test.ts"
   },
   "author": "Koh Wei Jie",
   "license": "MIT",
