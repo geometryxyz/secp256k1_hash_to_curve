@@ -8,7 +8,9 @@
         "test-expandMessageXmd": "jest ExpandMessageXmd.test.ts",
         "test-expandMessageXmd-debug": "node --inspect-brk ./node_modules/.bin/jest ExpandMessageXmd.test.ts",
         "test-hashToField": "jest HashToField.test.ts",
-        "test-hashToField-debug": "node --inspect-brk ./node_modules/.bin/jest HashToField.test.ts"
+        "test-hashToField-debug": "node --inspect-brk ./node_modules/.bin/jest HashToField.test.ts",
+        "test-mapToCurve": "jest MapToCurve.test.ts",
+        "test-mapToCurve-debug": "node --inspect-brk ./node_modules/.bin/jest MapToCurve.test.ts"
   },
   "author": "Koh Wei Jie",
   "license": "MIT",

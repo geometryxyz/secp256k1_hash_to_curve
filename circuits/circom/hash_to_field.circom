@@ -1,4 +1,5 @@
 pragma circom 2.0.0;
+include "./constants.circom";
 include "./expand_message_xmd.circom";
 
 template HashToField(msg_length) {
@@ -9,18 +10,6 @@ template HashToField(msg_length) {
     for (var i = 0; i < msg_length; i ++) {
         expand_message_xmd.msg[i] <== msg[i];
     }
-    /*var temp[96] = [*/
-        /*// u0 bytes*/
-        /*232, 52, 124, 173, 72, 171, 78, 49, 157, 123, 39, 85, 32, 234, 129,*/
-        /*207, 18, 138, 171, 93, 54, 121, 161, 247, 96, 30, 59, 222, 172, 154,*/
-        /*81, 208, 197, 77, 255, 208, 84, 39, 78, 219, 36, 136, 85, 230, 17, 144,*/
-        /*196, 98, */
-        /*// u1 bytes*/
-        /*167, 187, 97, 236, 186, 142, 64, 10, 154, 118, 213, 174, 1, 78, 135,*/
-        /*255, 88, 151, 182, 93, 163, 181, 149, 168, 19, 208, 253, 203, 206, 13,*/
-        /*49, 111, 118, 108, 238, 235, 111, 248, 76, 222, 204, 214, 155, 224,*/
-        /*231, 179, 153, 209*/
-    /*];*/
 
     component u0_bytes_to_registers = BytesToRegisters();
     component u1_bytes_to_registers = BytesToRegisters();
@@ -70,10 +59,11 @@ template BytesToRegisters() {
     for (var i = 6; i < 8; i ++) {
         m.a[i] <== 0;
     }
-    m.b[0] <== 18446744069414583343;
-    m.b[1] <== 18446744073709551615;
-    m.b[2] <== 18446744073709551615;
-    m.b[3] <== 18446744073709551615;
+
+    var p[4] = get_secp256k1_p();
+    for (var i = 0; i < 4; i ++) {
+        m.b[i] <== p[i];
+    }
 
     for (var i = 0; i < 4; i ++) {
         out[i] <== m.mod[i];

@@ -6,6 +6,7 @@ import {
     callGenWitness as genWitness,
     callGetSignalByName as getSignalByName,
 } from 'circom-helper'
+import { bigint_to_array } from './utils'
 
 describe('HashToField', () => {
     const msg = [97, 98, 99] // "abc"
@@ -35,6 +36,7 @@ describe('HashToField', () => {
             u0_registers.push(out)
             expect(out).toEqual(expected_u0_registers[i])
         }
+        expect(bigint_to_array(64, 4, BigInt('8386638881075453792406600069412283052291822895580742641789327979312054938465'))).toEqual(u0_registers)
         // u1
         const u1_registers: bigint[] = []
         for (let i = 0; i < 4; i ++) {
@@ -42,6 +44,7 @@ describe('HashToField', () => {
             u1_registers.push(out)
             expect(out).toEqual(expected_u1_registers[i])
         }
+        expect(bigint_to_array(64, 4, BigInt('40071583224459737250239606232440854032076176808341187421679277989916398099968'))).toEqual(u1_registers)
     })
  
     const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F')
@@ -84,18 +87,3 @@ describe('HashToField', () => {
     })
 })
 
-// From circom-ecdsa
-function bigint_to_array(n: number, k: number, x: bigint) {
-    let mod: bigint = BigInt(1);
-    for (var idx = 0; idx < n; idx++) {
-        mod = mod * BigInt(2);
-    }
-
-    let ret: bigint[] = [];
-    var x_temp: bigint = x;
-    for (var idx = 0; idx < k; idx++) {
-        ret.push(x_temp % mod);
-        x_temp = x_temp / mod;
-    }
-    return ret;
-}
