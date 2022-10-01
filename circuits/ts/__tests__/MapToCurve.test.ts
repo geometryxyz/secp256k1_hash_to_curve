@@ -31,11 +31,11 @@ describe('MapToCurve', () => {
         }
     })
 
-    it('Z * tv1', async () => {
-        const tv1 = bigint_to_array(64, 4, (u0 * u0) % p)
+    it('Z * u^2', async () => {
+        const u_squared = bigint_to_array(64, 4, (u0 * u0) % p)
         const expected_registers: bigint[] = bigint_to_array(64, 4, (Z * (u0 * u0)) % p)
-        const circuit = 'z_mul_tv1_squared_test'
-        const circuitInputs = stringifyBigInts({ tv1 })
+        const circuit = 'z_mul_u_squared_test'
+        const circuitInputs = stringifyBigInts({ u_squared })
         const witness = await genWitness(circuit, circuitInputs)
         for (let i = 0; i < 4; i ++) {
             const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
@@ -123,5 +123,27 @@ describe('MapToCurve', () => {
         const witness2 = await genWitness(circuit, circuitInputs2)
         const out2 = BigInt(await getSignalByName(circuit, witness2, 'main.out'))
         expect(out2).toEqual(BigInt(0))
+    })
+
+    it('sgn0()', async() => {
+        const circuit = 'sgn0_test'
+        const odd = BigInt('90488382598551863334512914506083217651378280855023645338709486233743148212823')
+        const even = BigInt('90488382598551863334512914506083217651378280855023645338709486233743148212822')
+
+        for (const val of [odd, even]) {
+            const circuitInputs = stringifyBigInts({ 'in': bigint_to_array(64, 4, val) })
+            const witness = await genWitness(circuit, circuitInputs)
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.out'))
+            expect(out).toEqual(val % BigInt(2))
+        }
+    })
+
+    it('MapToCurve()', async() => {
+        const circuit = 'map_to_curve_test'
+        const circuitInputs = stringifyBigInts({ u: bigint_to_array(64, 4, u0) })
+        const witness = await genWitness(circuit, circuitInputs)
+        const x = BigInt(await getSignalByName(circuit, witness, 'main.x'))
+        const y = BigInt(await getSignalByName(circuit, witness, 'main.y'))
+        console.log(x, '\n', y)
     })
 })

@@ -67,16 +67,16 @@ template Add() {
     }
 }
 
-template Square() {
-    signal input val[4];
+template Multiply() {
+    signal input a[4];
+    signal input b[4];
     signal output out[4];
-
     var p[4] = get_secp256k1_p();
 
     component mul_mod_p = BigMultModP(64, 4);
     for (var i = 0; i < 4; i ++) {
-        mul_mod_p.a[i] <== val[i];
-        mul_mod_p.b[i] <== val[i];
+        mul_mod_p.a[i] <== a[i];
+        mul_mod_p.b[i] <== b[i];
         mul_mod_p.p[i] <== p[i];
     }
 
@@ -85,21 +85,34 @@ template Square() {
     }
 }
 
-template ZMulTv1() {
-    signal input tv1[4];
+template Square() {
+    signal input in[4];
     signal output out[4];
-    var z[4] = get_Z();
-    var p[4] = get_secp256k1_p();
 
-    component mul_mod_p = BigMultModP(64, 4);
+    component mul = Multiply();
     for (var i = 0; i < 4; i ++) {
-        mul_mod_p.a[i] <== tv1[i];
-        mul_mod_p.b[i] <== z[i];
-        mul_mod_p.p[i] <== p[i];
+        mul.a[i] <== in[i];
+        mul.b[i] <== in[i];
     }
 
     for (var i = 0; i < 4; i ++) {
-        out[i] <== mul_mod_p.out[i];
+        out[i] <== mul.out[i];
+    }
+}
+
+template ZMulUSquared() {
+    signal input u_squared[4];
+    signal output out[4];
+    var z[4] = get_Z();
+
+    component mul = Multiply();
+    for (var i = 0; i < 4; i ++) {
+        mul.a[i] <== u_squared[i];
+        mul.b[i] <== z[i];
+    }
+
+    for (var i = 0; i < 4; i ++) {
+        out[i] <== mul.out[i];
     }
 }
 
@@ -132,4 +145,59 @@ template IsSquare() {
     result.in[0] <== sum[4];
     result.in[1] <== 4;
     out <== result.out;
+}
+
+// Output 0 if the input is even, and 1 if it is odd
+template Sgn0() {
+    signal input in[4];
+    signal output out;
+
+    // Only need to test the 0th bigint register
+    signal val;
+    val <== in[0];
+
+    signal r;
+    r <-- val % 2;
+
+    var q = val \ 2;
+
+    // Ensure that r is 0 xor 1
+    component is0 = IsEqual();
+    is0.in[0] <== r;
+    is0.in[1] <== 0;
+
+    component is1 = IsEqual();
+    is1.in[0] <== r;
+    is1.in[1] <== 1;
+
+    is0.out + is1.out === 1;
+
+    // Ensure that q * 2 + r equals the input
+    q * 2 + r === val;
+
+    // If the remainder is 0, output 0; if it is 1, output 1
+    out <== r;
+}
+
+template MapToCurve() {
+    signal input u[4];
+    signal output x;
+    signal output y;
+
+    // Step 1: tv1 = Z * u^2
+    component step1_square = Square();
+    for (var i = 0; i < 4; i ++) {
+        step1_square.in[i] <== u[i];
+    }
+    component step1_mul = ZMulUSquared();
+    for (var i = 0; i < 4; i ++) {
+        step1_mul.u_squared[i] <== step1_square.out[i];
+    }
+
+    for (var i = 0; i < 4; i ++) {
+        log(step1_mul.out[i]);
+    }
+
+    x <== 0;
+    y <== 0;
 }
