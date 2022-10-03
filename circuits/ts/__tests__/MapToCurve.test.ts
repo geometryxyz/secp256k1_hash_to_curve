@@ -156,32 +156,39 @@ describe('MapToCurve', () => {
         const x = BigInt(await getSignalByName(circuit, witness, 'main.x'))
         const y = BigInt(await getSignalByName(circuit, witness, 'main.y'))
 
-        // TODO: Step 1 check
+        // Step 1 check
+        const step1_tv1 = (Z * (u0 * u0)) % p
+        const step1_tv1_array = bigint_to_array(64, 4, step1_tv1)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.step1_tv1.out[' + i.toString() + ']'))
+            expect(out).toEqual(step1_tv1_array[i])
+        }
 
         // Step 2 check
-        const step2_tv1_sq = bigint_to_array(64, 4, BigInt('69125977817722673093369867421906949146947726600759336378042760386702683237276'))
+        const step2_tv2 = (step1_tv1 * step1_tv1) % p
+        const step2_tv2_array = bigint_to_array(64, 4, step2_tv2)
         for (let i = 0; i < 4; i ++) {
-            const out = BigInt(await getSignalByName(circuit, witness, 'main.step2_tv1_sq.out[' + i.toString() + ']'))
-            expect(out).toEqual(step2_tv1_sq[i])
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.step2_tv2.out[' + i.toString() + ']'))
+            expect(out).toEqual(step2_tv2_array[i])
         }
   
         // Step 3 check
-        const step3_tv1_plus_tv2 = bigint_to_array(64, 4, BigInt('89985101427612932131100812798697430382020736352596247464020696644799155962708'))
+        const step3_tv1_plus_tv2_array = bigint_to_array(64, 4, BigInt('89985101427612932131100812798697430382020736352596247464020696644799155962708'))
         for (let i = 0; i < 4; i ++) {
             const out = BigInt(await getSignalByName(circuit, witness, 'main.step3_tv1_plus_tv2.out[' + i.toString() + ']'))
-            expect(out).toEqual(step3_tv1_plus_tv2[i])
+            expect(out).toEqual(step3_tv1_plus_tv2_array[i])
         }
 
         // Step 4 check
-        const step4_inv0_x1 = bigint_to_array(64, 4, BigInt('8772949712675871307975074402064985445164432129069910775576927500367828979411'))
+        const step4_inv0_x1_array = bigint_to_array(64, 4, BigInt('8772949712675871307975074402064985445164432129069910775576927500367828979411'))
         for (let i = 0; i < 4; i ++) {
             const out = BigInt(await getSignalByName(circuit, witness, 'main.step4_inv0_x1.out[' + i.toString() + ']'))
-            expect(out).toEqual(step4_inv0_x1[i])
+            expect(out).toEqual(step4_inv0_x1_array[i])
         }
 
         // Step 5 check
-        const out = BigInt(await getSignalByName(circuit, witness, 'main.step5_e1.out'))
-        expect(out).toEqual(BigInt(0))
+        const step5_e1 = BigInt(await getSignalByName(circuit, witness, 'main.step5_e1.out'))
+        expect(step5_e1).toEqual(BigInt(0))
 
         // Step 6 check
         const step6_x1_plus_1 = BigInt('8772949712675871307975074402064985445164432129069910775576927500367828979411') + BigInt(1)
@@ -228,5 +235,49 @@ describe('MapToCurve', () => {
             const out = BigInt(await getSignalByName(circuit, witness, 'main.step11_gx1_mul_x1.out[' + i.toString() + ']'))
             expect(out).toEqual(step11_gx1_mul_x1_array[i])
         }
+
+        // Step 12 check
+        const step12_gx1 = (step11_gx1_mul_x1 + B) % p
+        const step12_gx1_array = bigint_to_array(64, 4, step12_gx1)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.step12_gx1.out[' + i.toString() + ']'))
+            expect(out).toEqual(step12_gx1_array[i])
+        }
+ 
+        // Step 13 check
+        const step13_x2 = (step1_tv1 * step8_x1_mul_c1) % p
+        const step13_x2_array = bigint_to_array(64, 4, step13_x2)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.step13_x2.out[' + i.toString() + ']'))
+            expect(out).toEqual(step13_x2_array[i])
+        }
+ 
+        // Step 14 check
+        const step14_tv2 = (step1_tv1 * step2_tv2) % p
+        const step14_tv2_array = bigint_to_array(64, 4, step14_tv2)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.step14_tv2.out[' + i.toString() + ']'))
+            expect(out).toEqual(step14_tv2_array[i])
+        }
+ 
+        // Step 15 check
+        const step15_gx2 = (step2_tv2 * step14_tv2) % p
+        const step15_gx2_array = bigint_to_array(64, 4, step15_gx2)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.step15_gx2.out[' + i.toString() + ']'))
+            expect(out).toEqual(step15_gx2_array[i])
+        }
+ 
+        // Step 16 check
+        //const sqrt_gx1 = sqrt_mod_p(step12_gx1, p)
+
+        // Step 17 check
+ 
+        // Step 18 check
+ 
+        // Step 19 check
+ 
+        // Step 20 check
+ 
     })
 })

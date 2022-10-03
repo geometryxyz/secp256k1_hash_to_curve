@@ -121,6 +121,10 @@ template ZMulUSquared() {
     }
 }
 
+// TODO: this is possibly insecure since the prover can provide expected_sqrt.
+// TODO: to fix this, perhaps do a = expected_sqrt_minus_1, b =
+// expected_sqrt, and c = expected_sqrt_plus_one too, and square those, and
+// show that a^2 < n < c ^ 2
 // Output 1 if sqrt(n) mod p == expected_sqrt, and 0 otherwise
 // The value of expected_sqrt can be calculated using
 // ffjavascript.F1Field.sqrt().
@@ -191,28 +195,28 @@ template MapToCurve() {
 
     ///////////////////////////////////////////////////////////////////////////
     // Step 1: tv1 = Z * u^2
-    component step1_square = Square();
+    component step1_u_sq = Square();
     for (var i = 0; i < 4; i ++) {
-        step1_square.in[i] <== u[i];
+        step1_u_sq.in[i] <== u[i];
     }
-    component step1_mul = ZMulUSquared();
+    component step1_tv1 = ZMulUSquared();
     for (var i = 0; i < 4; i ++) {
-        step1_mul.u_squared[i] <== step1_square.out[i];
+        step1_tv1.u_squared[i] <== step1_u_sq.out[i];
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // Step 2: tv2 = tv1^2
-    component step2_tv1_sq = Square();
+    component step2_tv2 = Square();
     for (var i = 0; i < 4; i ++) {
-        step2_tv1_sq.in[i] <== step1_mul.out[i];
+        step2_tv2.in[i] <== step1_tv1.out[i];
     }
 
     ///////////////////////////////////////////////////////////////////////////
     // Step 3: x1 = tv1 + tv2
     component step3_tv1_plus_tv2 = Add();
     for (var i = 0; i < 4; i ++) {
-        step3_tv1_plus_tv2.a[i] <== step1_mul.out[i];
-        step3_tv1_plus_tv2.b[i] <== step2_tv1_sq.out[i];
+        step3_tv1_plus_tv2.a[i] <== step1_tv1.out[i];
+        step3_tv1_plus_tv2.b[i] <== step2_tv2.out[i];
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -293,15 +297,36 @@ template MapToCurve() {
 
     ///////////////////////////////////////////////////////////////////////////
     // Step 12: gx1 = gx1 + B             # gx1 = g(x1) = x1^3 + A * x1 + B
+    var b[4] = get_B();
+    component step12_gx1 = Add();
+    for (var i = 0; i < 4; i ++) {
+        step12_gx1.a[i] <== step11_gx1_mul_x1.out[i];
+        step12_gx1.b[i] <== b[i];
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Step 13: x2 = tv1 * x1            # x2 = Z * u^2 * x1
+    component step13_x2 = Multiply();
+    for (var i = 0; i < 4; i ++) {
+        step13_x2.a[i] <== step1_tv1.out[i];
+        step13_x2.b[i] <== step8_x1_mul_c1.out[i];
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Step 14: tv2 = tv1 * tv2
+    component step14_tv2 = Multiply();
+    for (var i = 0; i < 4; i ++) {
+        step14_tv2.a[i] <== step1_tv1.out[i];
+        step14_tv2.b[i] <== step2_tv2.out[i];
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Step 15: gx2 = gx1 * tv2           # gx2 = (Z * u^2)^3 * gx1
+    component step15_gx2 = Multiply();
+    for (var i = 0; i < 4; i ++) {
+        step15_gx2.a[i] <== step12_gx1.out[i];
+        step15_gx2.b[i] <== step14_tv2.out[i];
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Step 16: e2 = is_square(gx1)
