@@ -72,6 +72,24 @@ template Add() {
     }
 }
 
+template Negate() {
+    signal input in[4];
+    signal output out[4];
+
+    var p[4] = get_secp256k1_p();
+
+    component sub = BigSubModP(64, 4);
+    for (var i = 0; i < 4; i ++) {
+        sub.a[i] <== p[i];
+        sub.b[i] <== in[i];
+        sub.p[i] <== p[i];
+    }
+
+    for (var i = 0; i < 4; i ++) {
+        out[i] <== sub.out[i];
+    }
+}
+
 template Multiply() {
     signal input a[4];
     signal input b[4];
@@ -121,35 +139,20 @@ template ZMulUSquared() {
     }
 }
 
-// TODO: this is possibly insecure since the prover can provide expected_sqrt.
-// TODO: to fix this, perhaps do a = expected_sqrt_minus_1, b =
-// expected_sqrt, and c = expected_sqrt_plus_one too, and square those, and
-// show that a^2 < n < c ^ 2
-// Output 1 if sqrt(n) mod p == expected_sqrt, and 0 otherwise
-// The value of expected_sqrt can be calculated using
-// ffjavascript.F1Field.sqrt().
-template IsSquare() {
-    signal input n[4];
-    signal input expected_sqrt[4];
+template IsEqualBigInt() {
+    signal input a[4];
+    signal input b[4];
     signal output out;
 
-    var p[4] = get_secp256k1_p();
-
-    component sq = Square();
-    for (var i = 0; i < 4; i ++) {
-        sq.val[i] <== expected_sqrt[i];
-    }
-
+    component is_eq[4];
     signal sum[5];
     sum[0] <== 0;
-    component is_eq[4];
     for (var i = 0; i < 4; i ++) {
         is_eq[i] = IsEqual();
-        is_eq[i].in[0] <== sq.out[i];
-        is_eq[i].in[1] <== n[i];
+        is_eq[i].in[0] <== a[i];
+        is_eq[i].in[1] <== b[i];
         sum[i + 1] <== sum[i] + is_eq[i].out;
     }
-
     component result = IsEqual();
     result.in[0] <== sum[4];
     result.in[1] <== 4;
@@ -188,10 +191,75 @@ template Sgn0() {
     out <== r;
 }
 
+template XY2Selector() {
+    // Either gx1 or gx2 are square.
+    signal input gx1[4];
+    signal input gx1_sqrt[4];
+    signal input gx2[4];
+    signal input gx2_sqrt[4];
+    signal input x1[4];
+    signal input x2[4];
+    signal output x[4];
+    signal output y2[4];
+
+    // Step 1: square gx1_sqrt
+    component sq_gx1_sqrt = Square();
+    for (var i = 0; i < 4; i ++) {
+        sq_gx1_sqrt.in[i] <== gx1_sqrt[i];
+    }
+
+    // Step 2: square gx2_sqrt
+    component sq_gx2_sqrt = Square();
+    for (var i = 0; i < 4; i ++) {
+        sq_gx2_sqrt.in[i] <== gx2_sqrt[i];
+    }
+
+    // Step 3: s1 = IsEqual(gx1, gx1_sqrt)
+    component s1 = IsEqualBigInt();
+    for (var i = 0; i < 4; i ++) {
+        s1.a[i] <== gx1[i];
+        s1.b[i] <== sq_gx1_sqrt.out[i];
+    }
+
+    // Step 4: s2 = IsEqual(gx2, gx2_sqrt)
+    component s2 = IsEqualBigInt();
+    for (var i = 0; i < 4; i ++) {
+        s2.a[i] <== gx2[i];
+        s2.b[i] <== sq_gx2_sqrt.out[i];
+    }
+
+    // Step 5: Constrain s1 + s2 === 1
+    s1.out + s2.out === 1;
+
+    // Step 6: x <== s1 == 1 ? x1 : x2
+    component x_cmov = CMov();
+    x_cmov.c <== s1.out;
+    for (var i = 0; i < 4; i ++) {
+        x_cmov.a[i] <== x2[i];
+        x_cmov.b[i] <== x1[i];
+    }
+
+    // Step 7: y2 <== s1 == 1 ? gx1 : gx2
+    component y2_cmov = CMov();
+    y2_cmov.c <== s1.out;
+    for (var i = 0; i < 4; i ++) {
+        y2_cmov.a[i] <== gx2[i];
+        y2_cmov.b[i] <== gx1[i];
+    }
+
+    for (var i = 0; i < 4; i ++) {
+        x[i] <== x_cmov.out[i];
+        y2[i] <== y2_cmov.out[i];
+    }
+}
+
 template MapToCurve() {
     signal input u[4];
-    signal output x;
-    signal output y;
+    signal input gx1_sqrt[4];
+    signal input gx2_sqrt[4];
+    signal input y[4];
+    signal output x_out[4];
+    signal output y_out[4];
 
     ///////////////////////////////////////////////////////////////////////////
     // Step 1: tv1 = Z * u^2
@@ -329,24 +397,59 @@ template MapToCurve() {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Step 16: e2 = is_square(gx1)
+    // Steps 16-18:
+    //     e2 = is_square(gx1)
+    //     x = CMOV(x2, x1, e2)    # If is_square(gx1), x = x1, else x = x2
+    //     y2 = CMOV(gx2, gx1, e2)  # If is_square(gx1), y2 = gx1, else y2 = gx2
+    component step16_x_y2_selector = XY2Selector();
+    for (var i = 0; i < 4; i ++) {
+        step16_x_y2_selector.gx1[i] <== step12_gx1.out[i];
+        step16_x_y2_selector.gx1_sqrt[i] <== gx1_sqrt[i];
+        step16_x_y2_selector.gx2[i] <== step15_gx2.out[i];
+        step16_x_y2_selector.gx2_sqrt[i] <== gx2_sqrt[i];
+        step16_x_y2_selector.x1[i] <== step8_x1_mul_c1.out[i];
+        step16_x_y2_selector.x2[i] <== step13_x2.out[i];
+    }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Step 17: x = CMOV(x2, x1, e2)    # If is_square(gx1), x = x1, else x = x2
+    // Step 19: y = sqrt(y2)
+    component step19_expected_y2 = Square();
+    for (var i = 0; i < 4; i ++) {
+        step19_expected_y2.in[i] <== y[i];
+    }
+    // Ensure that the square of the input signal y equals step16_x_y2_selector.y2
+    for (var i = 0; i < 4; i ++) {
+        step16_x_y2_selector.y2[i] === step19_expected_y2.out[i];
+    }
 
     ///////////////////////////////////////////////////////////////////////////
-    // Step 18: y2 = CMOV(gx2, gx1, e2)  # If is_square(gx1), y2 = gx1, else y2 = gx2
+    // Step 20: e3 = sgn0(u) == sgn0(y)  # Fix sign of y
+    component sgn0_u = Sgn0();
+    component sgn0_y = Sgn0();
+    for (var i = 0; i < 4; i ++) {
+        sgn0_u.in[i] <== u[i];
+        sgn0_y.in[i] <== y[i];
+    }
+    component step20_e3 = IsEqual();
+    step20_e3.in[0] <== sgn0_u.out;
+    step20_e3.in[1] <== sgn0_y.out;
 
     ///////////////////////////////////////////////////////////////////////////
-    // Step 18: y = sqrt(y2)
+    // Step 21: y = CMOV(-y, y, e3)
+    component neg_y = Negate();
+    for (var i = 0; i < 4; i ++) {
+        neg_y.in[i] <== y[i];
+    }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Step 19: e3 = sgn0(u) == sgn0(y)  # Fix sign of y
+    component step21_y = CMov();
+    step21_y.c <== step20_e3.out;
+    for (var i = 0; i < 4; i ++) {
+        step21_y.a[i] <== neg_y.in[i];
+        step21_y.b[i] <== y[i];
+    }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Step 20: y = CMOV(-y, y, e3)
-
-    x <== 0;
-    y <== 0;
-
+    for (var i = 0; i < 4; i ++) {
+        x_out[i] <== step16_x_y2_selector.x[i];
+        y_out[i] <== step21_y.out[i];
+    }
 }
