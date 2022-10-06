@@ -1,7 +1,7 @@
 pragma circom 2.0.0;
 
 include "./constants.circom";
-include "./map_to_curve.circom";
+include "./arith.circom";
 include "../node_modules/circom-ecdsa/circuits/bigint.circom";
 
 template IsoMap() {
