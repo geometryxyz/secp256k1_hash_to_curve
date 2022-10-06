@@ -10,7 +10,9 @@
         "test-hashToField": "jest HashToField.test.ts",
         "test-hashToField-debug": "node --inspect-brk ./node_modules/.bin/jest HashToField.test.ts",
         "test-mapToCurve": "jest MapToCurve.test.ts",
-        "test-mapToCurve-debug": "node --inspect-brk ./node_modules/.bin/jest MapToCurve.test.ts"
+        "test-mapToCurve-debug": "node --inspect-brk ./node_modules/.bin/jest MapToCurve.test.ts",
+        "test-isomap": "jest IsoMap.test.ts",
+        "test-isomap-debug": "node --inspect-brk ./node_modules/.bin/jest IsoMap.test.ts"
   },
   "author": "Koh Wei Jie",
   "license": "MIT",
