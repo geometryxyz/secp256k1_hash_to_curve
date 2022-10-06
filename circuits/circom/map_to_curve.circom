@@ -176,7 +176,7 @@ template MapToCurve() {
     signal input u[4];
     signal input gx1_sqrt[4];
     signal input gx2_sqrt[4];
-    signal input y[4];
+    signal input y_pos[4];
     signal output x_out[4];
     signal output y_out[4];
 
@@ -334,7 +334,7 @@ template MapToCurve() {
     // Step 19: y = sqrt(y2)
     component step19_expected_y2 = Square();
     for (var i = 0; i < 4; i ++) {
-        step19_expected_y2.in[i] <== y[i];
+        step19_expected_y2.in[i] <== y_pos[i];
     }
     // Ensure that the square of the input signal y equals step16_x_y2_selector.y2
     for (var i = 0; i < 4; i ++) {
@@ -347,7 +347,7 @@ template MapToCurve() {
     component sgn0_y = Sgn0();
     for (var i = 0; i < 4; i ++) {
         sgn0_u.in[i] <== u[i];
-        sgn0_y.in[i] <== y[i];
+        sgn0_y.in[i] <== y_pos[i];
     }
     component step20_e3 = IsEqual();
     step20_e3.in[0] <== sgn0_u.out;
@@ -357,14 +357,14 @@ template MapToCurve() {
     // Step 21: y = CMOV(-y, y, e3)
     component neg_y = Negate();
     for (var i = 0; i < 4; i ++) {
-        neg_y.in[i] <== y[i];
+        neg_y.in[i] <== y_pos[i];
     }
 
     component step21_y = CMov();
     step21_y.c <== step20_e3.out;
     for (var i = 0; i < 4; i ++) {
         step21_y.a[i] <== neg_y.in[i];
-        step21_y.b[i] <== y[i];
+        step21_y.b[i] <== y_pos[i];
     }
 
     for (var i = 0; i < 4; i ++) {

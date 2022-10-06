@@ -268,7 +268,7 @@ describe('MapToCurve', () => {
             u: bigint_to_array(64, 4, u0),
             gx1_sqrt: bigint_to_array(64, 4, gx1_sqrt),
             gx2_sqrt: bigint_to_array(64, 4, gx2_sqrt),
-            y: bigint_to_array(64, 4, step19_sqrt_y2)
+            y_pos: bigint_to_array(64, 4, step19_sqrt_y2)
         })
         const witness = await genWitness(circuit, circuitInputs)
 
