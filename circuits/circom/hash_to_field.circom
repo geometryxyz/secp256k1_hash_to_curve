@@ -44,8 +44,8 @@ template BytesToRegisters() {
     component b2n[6];
     for (var i = 0; i < 6; i ++) {
         b2n[i] = Bits2Num(64);
-        for (var j = 0 ; j < 8; j ++) {
-            for (var k = 0 ; k < 8; k ++) {
+        for (var j = 0; j < 8; j ++) {
+            for (var k = 0; k < 8; k ++) {
                 b2n[i].in[(7-j) * 8 + k] <== n2b[i * 8 + j].out[k];
             }
         }

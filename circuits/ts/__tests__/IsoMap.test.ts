@@ -7,7 +7,7 @@ import {
     callGetSignalByName as getSignalByName,
 } from 'circom-helper'
 
-import { bigint_to_array } from './utils'
+import { bigint_to_array } from '../utils'
 import {
     iso_map,
     compute_x_num,

@@ -7,9 +7,12 @@ import {
     callGetSignalByName as getSignalByName,
 } from 'circom-helper'
 
-import { bigint_to_array } from './utils'
+import { bigint_to_array } from '../utils'
 import { iso_map } from '../iso_map'
-import { sqrt_mod_p } from '../utils'
+import { sqrt_mod_p, sgn0 } from '../utils'
+import {
+    map_to_curve,
+} from '../generate_inputs'
 
 const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F')
 const u0 = BigInt('8386638881075453792406600069412283052291822895580742641789327979312054938465')
@@ -22,6 +25,7 @@ const Z = BigInt('11579208923731619542357098500868790785326998466564056403945758
 const Z_registers = bigint_to_array(64, 4, Z)
 const c1 = BigInt('5324262023205125242632636178842408935272934169651804884418803605709653231043')
 const c2 = BigInt('31579660701086235115519359547823974869073632181538335647124795638520591274090')
+const field = new ff.F1Field(p)
 
 describe('MapToCurve', () => {
     it('u ** 2', async () => {
@@ -208,9 +212,10 @@ describe('MapToCurve', () => {
         const step2_tv2 = (step1_tv1 * step1_tv1) % p
         const step2_tv2_array = bigint_to_array(64, 4, step2_tv2)
         // Step 3
-        const step3_tv1_plus_tv2_array = bigint_to_array(64, 4, BigInt('89985101427612932131100812798697430382020736352596247464020696644799155962708'))
+        const step3_tv1_plus_tv2 = (step1_tv1 + step2_tv2) % p
+        const step3_tv1_plus_tv2_array = bigint_to_array(64, 4, step3_tv1_plus_tv2)
         // Step 4
-        const step4_inv0_x1 = BigInt('8772949712675871307975074402064985445164432129069910775576927500367828979411')
+        const step4_inv0_x1 = field.inv(step3_tv1_plus_tv2)
         const step4_inv0_x1_array = bigint_to_array(64, 4, step4_inv0_x1)
         // Step 6
         const step6_x1_plus_1 = step4_inv0_x1 + BigInt(1)
@@ -240,7 +245,6 @@ describe('MapToCurve', () => {
         const step15_gx2 = (step12_gx1 * step14_tv2) % p
         const step15_gx2_array = bigint_to_array(64, 4, step15_gx2)
         // Step 16
-        const field = new ff.F1Field(p)
         let gx1_sqrt = field.sqrt(step12_gx1)
         let gx2_sqrt = field.sqrt(step15_gx2)
         let step16_expected_x
@@ -398,9 +402,9 @@ describe('MapToCurve', () => {
 
         const x_out = step16_expected_x
         const y_out = expected_y
+
+        const expected_result = map_to_curve(u0)
+        expect(x_out).toEqual(expected_result.x)
+        expect(y_out).toEqual(expected_result.y)
     })
 })
-
-const sgn0 = (input: bigint): bigint => {
-    return input % BigInt(2)
-}

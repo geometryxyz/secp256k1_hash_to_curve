@@ -6,16 +6,21 @@ import {
     callGenWitness as genWitness,
     callGetSignalByName as getSignalByName,
 } from 'circom-helper'
-import { bigint_to_array } from './utils'
+import { bigint_to_array } from '../utils'
+import {
+    bytes_to_registers,
+} from '../generate_inputs'
 
 describe('HashToField', () => {
     const msg = [97, 98, 99] // "abc"
-    const expected_u0_registers = [
-        BigInt('5220784225879993185'),
-        BigInt('4488152950487114122'),
-        BigInt('6926039108402729460'),
-        BigInt('1336068656303022583'),
+    const u0_bytes = [
+        232, 52, 124, 173, 72, 171, 78, 49, 157, 123, 39, 85, 32, 234, 129,
+        207, 18, 138, 171, 93, 54, 121, 161, 247, 96, 30, 59, 222, 172,
+        154, 81, 208, 197, 77, 255, 208, 84, 39, 78, 219, 36, 136, 85, 230,
+        17, 144, 196, 98
     ]
+
+    const expected_u0_registers = bytes_to_registers(u0_bytes)
 
     const expected_u1_registers = [
         BigInt('5596462452035853824'),
@@ -69,15 +74,8 @@ describe('HashToField', () => {
     })
 
     it('BytesToRegisters (for u0)', async () => {
-        const bytes = [
-            232, 52, 124, 173, 72, 171, 78, 49, 157, 123, 39, 85, 32, 234, 129,
-            207, 18, 138, 171, 93, 54, 121, 161, 247, 96, 30, 59, 222, 172,
-            154, 81, 208, 197, 77, 255, 208, 84, 39, 78, 219, 36, 136, 85, 230,
-            17, 144, 196, 98
-        ]
-
         const circuit = 'bytes_to_registers_test'
-        const circuitInputs = stringifyBigInts({ bytes: bytes })
+        const circuitInputs = stringifyBigInts({ bytes: u0_bytes })
         const witness = await genWitness(circuit, circuitInputs)
         const registers: bigint[] = []
         for (let i = 0; i < 4; i ++) {

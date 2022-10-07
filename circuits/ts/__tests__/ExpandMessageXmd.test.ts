@@ -6,35 +6,34 @@ import {
     callGenWitness as genWitness,
     callGetSignalByName as getSignalByName,
 } from 'circom-helper'
+import {
+    dst_prime,
+    z_pad,
+    lib_str,
+} from '../constants'
+import {
+    str_to_array,
+    gen_msg_prime,
+    gen_b0,
+    gen_b1,
+    gen_b2,
+    gen_b3,
+    strxor,
+    expand_msg_xmd,
+} from '../generate_inputs'
 
 describe('ExpandMessageXmd', () => {
-    const msg = [97, 98, 99] // "abc"
-    const dst_prime = [
-        81, 85, 85, 88, 45, 86, 48, 49, 45, 67, 83, 48, 50, 45, 119, 105, 116,
-        104, 45, 115, 101, 99, 112, 50, 53, 54, 107, 49, 95, 88, 77, 68, 58,
-        83, 72, 65, 45, 50, 53, 54, 95, 83, 83, 87, 85, 95, 82, 79, 95, 49
+    const msg = 'abc'
+    const expected_msg_prime = gen_msg_prime(msg)
+    const expected_msg_prime2 = [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 97, 98,
+        99, 0, 96, 0, 81, 85, 85, 88, 45, 86, 48, 49, 45, 67, 83, 48, 50,
+        45, 119, 105, 116, 104, 45, 115, 101, 99, 112, 50, 53, 54, 107, 49,
+        95, 88, 77, 68, 58, 83, 72, 65, 45, 50, 53, 54, 95, 83, 83, 87, 85,
+        95, 82, 79, 95, 49
     ]
-    const z_pad = [
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0
-    ]
-    const lib_str = [0, 96]
-    const expected_msg_prime = z_pad.concat(msg).concat(lib_str).concat([0]).concat(dst_prime)
-    //const expected_msg_prime = [
-        //0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        //0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        //0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 97, 98,
-        //99, 0, 96, 0, 81, 85, 85, 88, 45, 86, 48, 49, 45, 67, 83, 48, 50,
-        //45, 119, 105, 116, 104, 45, 115, 101, 99, 112, 50, 53, 54, 107, 49,
-        //95, 88, 77, 68, 58, 83, 72, 65, 45, 50, 53, 54, 95, 83, 83, 87, 85,
-        //95, 82, 79, 95, 49
-    //]
     const expected_b0 = [
         99, 4, 75, 36, 124, 254, 65, 234, 207, 65, 212, 122, 206, 186, 87,
         48, 157, 28, 243, 255, 59, 178, 30, 40, 136, 85, 202, 99, 135, 177,
@@ -96,19 +95,19 @@ describe('ExpandMessageXmd', () => {
     // Test the MsgPrime circuit
     it('msg_prime', async () => {
         const circuit = 'msg_prime_test'
-        const circuitInputs = stringifyBigInts({ msg })
+        const circuitInputs = stringifyBigInts({ msg: str_to_array(msg) })
 
         const witness = await genWitness(circuit, circuitInputs)
         for (let i = 0; i < 120; i ++) {
             const out = Number(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
             expect(out).toEqual(expected_msg_prime[i])
+            expect(out).toEqual(expected_msg_prime2[i])
         }
     })
 
     // Hash msg_prime with SHA256
     it('b0 = h(msg_prime)', async () => {
-        const buff = Buffer.from(expected_msg_prime)
-        const hash = crypto.createHash("sha256").update(buff).digest()
+        const hash = gen_b0(expected_msg_prime)
 
         for (let i = 0; i < 32; i ++) {
             expect(hash[i]).toEqual(expected_b0[i])
@@ -131,8 +130,9 @@ describe('ExpandMessageXmd', () => {
     })
 
     it('b1 = h(b0 || 1 || dst_prime)', async () => {
-        const buff = Buffer.from(expected_b0.concat([1]).concat(dst_prime))
-        const hash = crypto.createHash("sha256").update(buff).digest()
+        //const buff = Buffer.from(expected_b0.concat([1]).concat(dst_prime))
+        //const hash = crypto.createHash("sha256").update(buff).digest()
+        const hash = gen_b1(expected_b0)
         for (let i = 0; i < 32; i ++) {
             expect(hash[i]).toEqual(expected_b1[i])
         }
@@ -151,8 +151,7 @@ describe('ExpandMessageXmd', () => {
     })
 
     it('b2 = h(strxor(b0, b1) || 2 || dst_prime)', async () => {
-        const buff = Buffer.from(strxor(expected_b0, expected_b1).concat([2]).concat(dst_prime))
-        const hash = crypto.createHash("sha256").update(buff).digest()
+        const hash = gen_b2(expected_b0, expected_b1)
         for (let i = 0; i < 32; i ++) {
             expect(hash[i]).toEqual(expected_b2[i])
         }
@@ -171,8 +170,7 @@ describe('ExpandMessageXmd', () => {
     })
 
     it('b3 = h(strxor(b0, b2) || 3 || dst_prime)', async () => {
-        const buff = Buffer.from(strxor(expected_b0, expected_b2).concat([3]).concat(dst_prime))
-        const hash = crypto.createHash("sha256").update(buff).digest()
+        const hash = gen_b3(expected_b0, expected_b2)
         for (let i = 0; i < 32; i ++) {
             expect(hash[i]).toEqual(expected_b3[i])
         }
@@ -192,7 +190,7 @@ describe('ExpandMessageXmd', () => {
 
     it('ExpandMessageXmd', async () => {
         const circuit = 'expand_msg_xmd_test'
-        const circuitInputs = stringifyBigInts({ msg })
+        const circuitInputs = stringifyBigInts({ msg: str_to_array(msg) })
 
         const witness = await genWitness(circuit, circuitInputs)
 
@@ -202,21 +200,13 @@ describe('ExpandMessageXmd', () => {
             bytes.push(out)
         }
 
-        const expected = expected_b1.concat(expected_b2).concat(expected_b3)
+        const expected = expand_msg_xmd(msg)
         expect(expected.length).toEqual(bytes.length)
         for (let i = 0; i < 96; i ++) {
             expect(bytes[i]).toEqual(expected[i])
         }
     })
 })
-
-const strxor = (a: number[], b: number[]): number[] => {
-    const result: number[] = []
-    for (let i = 0; i < a.length; i ++) {
-        result.push(a[i] ^ b[i])
-    }
-    return result
-}
 
 function buffer2bitArray(b) {
     const res: number[] = [];

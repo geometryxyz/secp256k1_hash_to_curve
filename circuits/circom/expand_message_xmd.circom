@@ -1,31 +1,10 @@
 pragma circom 2.0.0;
+include "./constants.circom";
 include "../node_modules/circom-ecdsa/circuits/bigint.circom";
 include "../node_modules/circom-ecdsa/node_modules/circomlib/circuits/sha256/sha256.circom";
 /*include "../node_modules/circomlib/circuits/sha256/sha256.circom";*/
 /*include "../node_modules/circomlib/circuits/bitify.circom";*/
 /*include "../node_modules/circomlib/circuits/gates.circom";*/
-
-function get_dst_prime() {
-    var dst_prime[50] = [
-        81, 85, 85, 88, 45, 86, 48, 49, 45, 67, 83, 48, 50, 45, 119, 105, 116,
-        104, 45, 115, 101, 99, 112, 50, 53, 54, 107, 49, 95, 88, 77, 68, 58,
-        83, 72, 65, 45, 50, 53, 54, 95, 83, 83, 87, 85, 95, 82, 79, 95, 49
-    ];
-    return dst_prime;
-}
-
-function get_lib_str() {
-    var lib_str[2] = [0, 96];
-    return lib_str;
-}
-
-function get_z_pad() {
-    var z_pad[64];
-    for (var i = 0; i < 64; i ++) {
-        z_pad[i] = 0;
-    }
-    return z_pad;
-}
 
 function calc_msg_prime_output_length(msg_length) {
     return msg_length + 64 + 2 + 50 + 1;

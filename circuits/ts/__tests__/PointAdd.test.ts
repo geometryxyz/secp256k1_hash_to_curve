@@ -8,7 +8,7 @@ import {
     callGetSignalByName as getSignalByName,
 } from 'circom-helper'
 
-import { bigint_to_array } from './utils'
+import { bigint_to_array } from '../utils'
 
 const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F')
 
