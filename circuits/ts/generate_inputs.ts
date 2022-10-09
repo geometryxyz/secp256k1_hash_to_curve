@@ -109,7 +109,7 @@ const map_to_curve = (u: bigint) => {
     const step14_tv2 = (step1_tv1 * step2_tv2) % p
     // Step 15
     const step15_gx2 = (step12_gx1 * step14_tv2) % p
-    // Step 16
+    // Step 16-18
     let gx1_sqrt = field.sqrt(step12_gx1)
     let gx2_sqrt = field.sqrt(step15_gx2)
     let step16_expected_x
@@ -142,9 +142,11 @@ const map_to_curve = (u: bigint) => {
     const x_out = step16_expected_x
     const y_out = expected_y
 
+    const mapped = iso_map(x_out, y_out, p)
+
     return {
-        x: x_out,
-        y: y_out,
+        x: mapped.x,
+        y: mapped.y,
         gx1_sqrt,
         gx2_sqrt,
         y_pos: step19_sqrt_y2,
@@ -161,10 +163,7 @@ const generate_inputs = (msg: string): any => {
     const u1 = ff.utils.beBuff2int(Buffer.from(u1_bytes)) % p
 
     const q0 = map_to_curve(u0)
-    const q0_mapped = iso_map(q0.x, q0.y, p)
-
     const q1 = map_to_curve(u1)
-    const q1_mapped = iso_map(q1.x, q1.y, p)
 
     return {
         msg: str_to_array(msg),
@@ -174,10 +173,10 @@ const generate_inputs = (msg: string): any => {
         q1_gx1_sqrt: bigint_to_array(64, 4, q1.gx1_sqrt),
         q1_gx2_sqrt: bigint_to_array(64, 4, q1.gx2_sqrt),
         q1_y_pos: bigint_to_array(64, 4, q1.y_pos),
-        q0_x_mapped: bigint_to_array(64, 4, q0_mapped.x),
-        q0_y_mapped: bigint_to_array(64, 4, q0_mapped.y),
-        q1_x_mapped: bigint_to_array(64, 4, q1_mapped.x),
-        q1_y_mapped: bigint_to_array(64, 4, q1_mapped.y),
+        q0_x_mapped: bigint_to_array(64, 4, q0.x),
+        q0_y_mapped: bigint_to_array(64, 4, q0.y),
+        q1_x_mapped: bigint_to_array(64, 4, q1.x),
+        q1_y_mapped: bigint_to_array(64, 4, q1.y),
     }
 
     //const q0_mapped_pt = new Point(q0_mapped.x, q0_mapped.y)

@@ -2,6 +2,7 @@ pragma circom 2.0.0;
 
 include "./constants.circom";
 include "./arith.circom";
+include "./iso_map.circom";
 include "../node_modules/circom-ecdsa/circuits/bigint.circom";
 include "../node_modules/circom-ecdsa/node_modules/circomlib/circuits/mux1.circom";
 include "../node_modules/circom-ecdsa/node_modules/circomlib/circuits/comparators.circom";
@@ -180,8 +181,10 @@ template MapToCurve() {
     signal input gx1_sqrt[4];
     signal input gx2_sqrt[4];
     signal input y_pos[4];
-    signal output x_out[4];
-    signal output y_out[4];
+    signal input x_mapped[4];
+    signal input y_mapped[4];
+    signal output x[4];
+    signal output y[4];
 
     ///////////////////////////////////////////////////////////////////////////
     // Step 1: tv1 = Z * u^2
@@ -370,8 +373,16 @@ template MapToCurve() {
         step21_y.b[i] <== y_pos[i];
     }
 
+    component isomap = IsoMap();
     for (var i = 0; i < 4; i ++) {
-        x_out[i] <== step16_x_y2_selector.x[i];
-        y_out[i] <== step21_y.out[i];
+        isomap.x[i] <== step16_x_y2_selector.x[i];
+        isomap.y[i] <== step21_y.out[i];
+        isomap.x_mapped[i] <== x_mapped[i];
+        isomap.y_mapped[i] <== y_mapped[i];
+    }
+
+    for (var i = 0; i < 4; i ++) {
+        x[i] <== x_mapped[i];
+        y[i] <== y_mapped[i];
     }
 }

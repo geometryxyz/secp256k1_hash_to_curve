@@ -34,6 +34,8 @@ template HashToCurve(msg_length) {
         m2c_q0.gx1_sqrt[i] <== q0_gx1_sqrt[i];
         m2c_q0.gx2_sqrt[i] <== q0_gx2_sqrt[i];
         m2c_q0.y_pos[i] <== q0_y_pos[i];
+        m2c_q0.x_mapped[i] <== q0_x_mapped[i];
+        m2c_q0.y_mapped[i] <== q0_y_mapped[i];
     }
 
     // Step 3: Q1 = map_to_curve(u[1])
@@ -43,27 +45,11 @@ template HashToCurve(msg_length) {
         m2c_q1.gx1_sqrt[i] <== q1_gx1_sqrt[i];
         m2c_q1.gx2_sqrt[i] <== q1_gx2_sqrt[i];
         m2c_q1.y_pos[i] <== q1_y_pos[i];
+        m2c_q1.x_mapped[i] <== q1_x_mapped[i];
+        m2c_q1.y_mapped[i] <== q1_y_mapped[i];
     }
 
-    // Step 4: A = iso_map(Q0)
-    component iso_map_q0 = IsoMap();
-    for (var i = 0; i < 4; i ++) {
-        iso_map_q0.x[i] <== m2c_q0.x_out[i];
-        iso_map_q0.y[i] <== m2c_q0.y_out[i];
-        iso_map_q0.x_mapped[i] <== q0_x_mapped[i];
-        iso_map_q0.y_mapped[i] <== q0_y_mapped[i];
-    }
-
-    // Step 5: B = iso_map(Q1)
-    component iso_map_q1 = IsoMap();
-    for (var i = 0; i < 4; i ++) {
-        iso_map_q1.x[i] <== m2c_q1.x_out[i];
-        iso_map_q1.y[i] <== m2c_q1.y_out[i];
-        iso_map_q1.x_mapped[i] <== q1_x_mapped[i];
-        iso_map_q1.y_mapped[i] <== q1_y_mapped[i];
-    }
-
-    // Step 6: return A + B
+    // Step 4: return A + B
     component point_add = PointAdd();
     for (var i = 0; i < 4; i ++) {
         point_add.a[0][i] <== q0_x_mapped[i];
