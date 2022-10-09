@@ -12,6 +12,8 @@ import { iso_map } from '../iso_map'
 import { sqrt_mod_p, sgn0 } from '../utils'
 import {
     map_to_curve,
+    expand_msg_xmd,
+    generate_inputs,
 } from '../generate_inputs'
 
 const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F')
@@ -406,5 +408,42 @@ describe('MapToCurve', () => {
         const expected_result = map_to_curve(u0)
         expect(x_out).toEqual(expected_result.x)
         expect(y_out).toEqual(expected_result.y)
+    })
+
+    it('map_to_curve for abcdef0123456789 u1', async () => {
+        const circuit = 'map_to_curve_test'
+        const msg = 'abcdef0123456789'
+        const uniform_bytes = expand_msg_xmd(msg)
+
+        //const u0_bytes = uniform_bytes.slice(0, 48)
+        //const u0 = ff.utils.beBuff2int(Buffer.from(u0_bytes)) % p
+ 
+        const u1_bytes = uniform_bytes.slice(48)
+        const u1 = ff.utils.beBuff2int(Buffer.from(u1_bytes)) % p
+
+        const q1 = map_to_curve(u1)
+        const q1_mapped = iso_map(q1.x, q1.y, p)
+
+        const inputs = generate_inputs(msg)
+
+        // Generate witness
+        const circuitInputs = stringifyBigInts({
+            u: bigint_to_array(64, 4, u1),
+            gx1_sqrt: inputs.q1_gx1_sqrt,
+            gx2_sqrt: inputs.q1_gx2_sqrt,
+            y_pos: inputs.q1_y_pos,
+        })
+
+        // x and y in E' - iso_map is not applied
+        const expected_x_out_array = bigint_to_array(64, 4, q1.x)
+        const expected_y_out_array = bigint_to_array(64, 4, q1.y)
+
+        const witness = await genWitness(circuit, circuitInputs)
+        for (let i = 0; i < 4; i ++) {
+            const x_out = BigInt(await getSignalByName(circuit, witness, 'main.x_out[' + i.toString() + ']'))
+            expect(x_out).toEqual(expected_x_out_array[i])
+            const y_out = BigInt(await getSignalByName(circuit, witness, 'main.y_out[' + i.toString() + ']'))
+            expect(y_out).toEqual(expected_y_out_array[i])
+        }
     })
 })

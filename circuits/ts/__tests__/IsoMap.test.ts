@@ -139,4 +139,24 @@ describe('IsoMap', () => {
             const witness = await genWitness(circuit, circuitInputs)
         }
     })
+
+    it('IsoMap circuit', async () => {
+        const circuit = 'iso_map_test'
+        const u1 = BigInt('52561607698273230922893701749432844571766812627334290650941810523569022097944')
+        const x = BigInt('64194511559750490853478619256035491267414370428644296524684110489113862940138')
+        const y = BigInt('102352885279598387049455667780191904281516840171708369876930321669597547584074')
+        const q1 = {
+            x_mapped: BigInt('112451734755426834716648727358299441967457432883933738090080934024500761239544'),
+            y_mapped: BigInt('81063536041005174460194413543313074086488650157769284612643288531187436138327'),
+        }
+
+        const m = iso_map(x, y, p)
+        const circuitInputs = stringifyBigInts({ 
+            x: bigint_to_array(64, 4, x),
+            y: bigint_to_array(64, 4, y),
+            x_mapped: bigint_to_array(64, 4, q1.x_mapped),
+            y_mapped: bigint_to_array(64, 4, q1.y_mapped),
+        })
+        const witness = await genWitness(circuit, circuitInputs)
+    })
 })

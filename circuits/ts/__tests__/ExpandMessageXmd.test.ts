@@ -130,8 +130,6 @@ describe('ExpandMessageXmd', () => {
     })
 
     it('b1 = h(b0 || 1 || dst_prime)', async () => {
-        //const buff = Buffer.from(expected_b0.concat([1]).concat(dst_prime))
-        //const hash = crypto.createHash("sha256").update(buff).digest()
         const hash = gen_b1(expected_b0)
         for (let i = 0; i < 32; i ++) {
             expect(hash[i]).toEqual(expected_b1[i])

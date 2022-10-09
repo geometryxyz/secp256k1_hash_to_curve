@@ -7,7 +7,10 @@ include "../node_modules/circom-ecdsa/node_modules/circomlib/circuits/mux1.circo
 include "../node_modules/circom-ecdsa/node_modules/circomlib/circuits/comparators.circom";
 
 template CMov() {
-    // If c is 0, output a. Otherwise, output b. 
+    // The spec says "CMOV(a, b, c): If c is False, CMOV returns a, otherwise
+    // it returns b."
+
+    // As such, if c is 0, output a. Otherwise, output b. 
     signal input a[4];
     signal input b[4];
     signal input c;
@@ -133,14 +136,14 @@ template XY2Selector() {
         sq_gx2_sqrt.in[i] <== gx2_sqrt[i];
     }
 
-    // Step 3: s1 = IsEqual(gx1, gx1_sqrt)
+    // Step 3: s1 = IsEqual(gx1, sq_gx1_sqrt)
     component s1 = IsEqualBigInt();
     for (var i = 0; i < 4; i ++) {
         s1.a[i] <== gx1[i];
         s1.b[i] <== sq_gx1_sqrt.out[i];
     }
 
-    // Step 4: s2 = IsEqual(gx2, gx2_sqrt)
+    // Step 4: s2 = IsEqual(gx2, sq_gx2_sqrt)
     component s2 = IsEqualBigInt();
     for (var i = 0; i < 4; i ++) {
         s2.a[i] <== gx2[i];
@@ -363,7 +366,7 @@ template MapToCurve() {
     component step21_y = CMov();
     step21_y.c <== step20_e3.out;
     for (var i = 0; i < 4; i ++) {
-        step21_y.a[i] <== neg_y.in[i];
+        step21_y.a[i] <== neg_y.out[i];
         step21_y.b[i] <== y_pos[i];
     }
 

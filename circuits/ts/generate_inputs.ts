@@ -161,9 +161,9 @@ const generate_inputs = (msg: string): any => {
     const u1 = ff.utils.beBuff2int(Buffer.from(u1_bytes)) % p
 
     const q0 = map_to_curve(u0)
-    const q1 = map_to_curve(u1)
-
     const q0_mapped = iso_map(q0.x, q0.y, p)
+
+    const q1 = map_to_curve(u1)
     const q1_mapped = iso_map(q1.x, q1.y, p)
 
     return {

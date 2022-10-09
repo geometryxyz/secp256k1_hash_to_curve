@@ -68,6 +68,7 @@ template IsoMap() {
         y_check.a[i] <== y_mapped[i];
         y_check.b[i] <== y_den.out[i];
     }
+
     component y_check2 = Multiply();
     for (var i = 0; i < 4; i ++) {
         y_check2.a[i] <== y[i];
