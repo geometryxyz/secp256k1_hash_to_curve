@@ -30,179 +30,179 @@ const c2 = BigInt('3157966070108623511551935954782397486907363218153833564712479
 const field = new ff.F1Field(p)
 
 describe('MapToCurve', () => {
-    //it('u ** 2', async () => {
-        //const expected_registers: bigint[] = bigint_to_array(64, 4, (u0 * u0) % p)
+    it('u ** 2', async () => {
+        const expected_registers: bigint[] = bigint_to_array(64, 4, (u0 * u0) % p)
 
-        //const circuit = 'u_squared_test'
-        //const circuitInputs = stringifyBigInts({ 'in': u0_registers })
-        //const witness = await genWitness(circuit, circuitInputs)
-        //for (let i = 0; i < 4; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            //expect(out).toEqual(expected_registers[i])
-        //}
-    //})
+        const circuit = 'u_squared_test'
+        const circuitInputs = stringifyBigInts({ 'in': u0_registers })
+        const witness = await genWitness(circuit, circuitInputs)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            expect(out).toEqual(expected_registers[i])
+        }
+    })
 
-    //it('Z * u^2', async () => {
-        //const u_squared = bigint_to_array(64, 4, (u0 * u0) % p)
-        //const expected_registers: bigint[] = bigint_to_array(64, 4, (Z * (u0 * u0)) % p)
-        //const circuit = 'z_mul_u_squared_test'
-        //const circuitInputs = stringifyBigInts({ u_squared })
-        //const witness = await genWitness(circuit, circuitInputs)
-        //for (let i = 0; i < 4; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            //expect(out).toEqual(expected_registers[i])
-        //}
-    //})
+    it('Z * u^2', async () => {
+        const u_squared = bigint_to_array(64, 4, (u0 * u0) % p)
+        const expected_registers: bigint[] = bigint_to_array(64, 4, (Z * (u0 * u0)) % p)
+        const circuit = 'z_mul_u_squared_test'
+        const circuitInputs = stringifyBigInts({ u_squared })
+        const witness = await genWitness(circuit, circuitInputs)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            expect(out).toEqual(expected_registers[i])
+        }
+    })
 
-    //it('x1 = tv1 + tv2', async () => {
-        //const tv1 = (Z * u0 * u0) % p
-        //const tv2 = (tv1 * tv1) % p
+    it('x1 = tv1 + tv2', async () => {
+        const tv1 = (Z * u0 * u0) % p
+        const tv2 = (tv1 * tv1) % p
 
-        //expect(tv1).toEqual(BigInt('20859123609890259037730945376790481235073009751836911085977936258096472725432'))
-        //expect(tv2).toEqual(BigInt('69125977817722673093369867421906949146947726600759336378042760386702683237276'))
+        expect(tv1).toEqual(BigInt('20859123609890259037730945376790481235073009751836911085977936258096472725432'))
+        expect(tv2).toEqual(BigInt('69125977817722673093369867421906949146947726600759336378042760386702683237276'))
 
-        //const tv1_registers = bigint_to_array(64, 4, tv1)
-        //const tv2_registers = bigint_to_array(64, 4, tv2)
-        //const expected_registers = bigint_to_array(64, 4, (tv1 + tv2) % p)
+        const tv1_registers = bigint_to_array(64, 4, tv1)
+        const tv2_registers = bigint_to_array(64, 4, tv2)
+        const expected_registers = bigint_to_array(64, 4, (tv1 + tv2) % p)
 
-        //const x1_registers = bigint_to_array(64, 4, BigInt('89985101427612932131100812798697430382020736352596247464020696644799155962708'))
-        //for (let i = 0; i < 4; i ++) {
-            //expect(x1_registers[i]).toEqual(expected_registers[i])
-        //}
+        const x1_registers = bigint_to_array(64, 4, BigInt('89985101427612932131100812798697430382020736352596247464020696644799155962708'))
+        for (let i = 0; i < 4; i ++) {
+            expect(x1_registers[i]).toEqual(expected_registers[i])
+        }
 
-        //const circuit = 'tv2_plus_tv1_test'
-        //const circuitInputs = stringifyBigInts({
-            //a: tv1_registers,
-            //b: tv2_registers,
-        //})
-        //const witness = await genWitness(circuit, circuitInputs)
-        //for (let i = 0; i < 4; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            //expect(out).toEqual(expected_registers[i])
-        //}
-    //})
+        const circuit = 'tv2_plus_tv1_test'
+        const circuitInputs = stringifyBigInts({
+            a: tv1_registers,
+            b: tv2_registers,
+        })
+        const witness = await genWitness(circuit, circuitInputs)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            expect(out).toEqual(expected_registers[i])
+        }
+    })
 
-    //it('x1 = inv0(x1)', async () => {
-        //const x1 = BigInt('89985101427612932131100812798697430382020736352596247464020696644799155962708')
-        //const inv_x1 = BigInt('8772949712675871307975074402064985445164432129069910775576927500367828979411')
-        //const x1_registers = bigint_to_array(64, 4, x1)
-        //const inv_x1_registers = bigint_to_array(64, 4, inv_x1)
-        //const circuit = 'inv0_test'
-        //const circuitInputs = stringifyBigInts({
-            //a: x1_registers,
-        //})
-        //const witness = await genWitness(circuit, circuitInputs)
-        //for (let i = 0; i < 4; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            //expect(out).toEqual(inv_x1_registers[i])
-        //}
-    //})
+    it('x1 = inv0(x1)', async () => {
+        const x1 = BigInt('89985101427612932131100812798697430382020736352596247464020696644799155962708')
+        const inv_x1 = BigInt('8772949712675871307975074402064985445164432129069910775576927500367828979411')
+        const x1_registers = bigint_to_array(64, 4, x1)
+        const inv_x1_registers = bigint_to_array(64, 4, inv_x1)
+        const circuit = 'inv0_test'
+        const circuitInputs = stringifyBigInts({
+            a: x1_registers,
+        })
+        const witness = await genWitness(circuit, circuitInputs)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            expect(out).toEqual(inv_x1_registers[i])
+        }
+    })
 
-    //it('cmov', async () => {
-        //const circuit = 'cmov_test'
-        //const a = BigInt('89985101427612932131100812798697430382020736352596247464020696644799155962708')
-        //const b = BigInt('456')
-        //const a_array = bigint_to_array(64, 4, a)
-        //const b_array = bigint_to_array(64, 4, b)
+    it('cmov', async () => {
+        const circuit = 'cmov_test'
+        const a = BigInt('89985101427612932131100812798697430382020736352596247464020696644799155962708')
+        const b = BigInt('456')
+        const a_array = bigint_to_array(64, 4, a)
+        const b_array = bigint_to_array(64, 4, b)
 
-        //const circuitInputs = stringifyBigInts({ a: a_array, b: a_array, c: 0 })
-        //const witness = await genWitness(circuit, circuitInputs)
-        //for (let i = 0; i < 4; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            //expect(out).toEqual(a_array[i])
-        //}
+        const circuitInputs = stringifyBigInts({ a: a_array, b: a_array, c: 0 })
+        const witness = await genWitness(circuit, circuitInputs)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            expect(out).toEqual(a_array[i])
+        }
 
-        //const circuitInputs2 = stringifyBigInts({ a: a_array, b: b_array, c: 1 })
-        //const witness2 = await genWitness(circuit, circuitInputs2)
-        //for (let i = 0; i < 4; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness2, 'main.out[' + i.toString() + ']'))
-            //expect(out).toEqual(b_array[i])
-        //}
-    //})
+        const circuitInputs2 = stringifyBigInts({ a: a_array, b: b_array, c: 1 })
+        const witness2 = await genWitness(circuit, circuitInputs2)
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness2, 'main.out[' + i.toString() + ']'))
+            expect(out).toEqual(b_array[i])
+        }
+    })
 
-    //it('sgn0()', async() => {
-        //const circuit = 'sgn0_test'
-        //const odd = BigInt('90488382598551863334512914506083217651378280855023645338709486233743148212823')
-        //const even = BigInt('90488382598551863334512914506083217651378280855023645338709486233743148212822')
+    it('sgn0()', async() => {
+        const circuit = 'sgn0_test'
+        const odd = BigInt('90488382598551863334512914506083217651378280855023645338709486233743148212823')
+        const even = BigInt('90488382598551863334512914506083217651378280855023645338709486233743148212822')
 
-        //for (const val of [odd, even]) {
-            //const circuitInputs = stringifyBigInts({ 'in': bigint_to_array(64, 4, val) })
-            //const witness = await genWitness(circuit, circuitInputs)
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out'))
-            //expect(out).toEqual(val % BigInt(2))
-        //}
-    //})
+        for (const val of [odd, even]) {
+            const circuitInputs = stringifyBigInts({ 'in': bigint_to_array(64, 4, val) })
+            const witness = await genWitness(circuit, circuitInputs)
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.out'))
+            expect(out).toEqual(val % BigInt(2))
+        }
+    })
 
-    //it('XY2Selector()', async() => {
-        //const circuit = 'x_y2_selector_test'
+    it('XY2Selector()', async() => {
+        const circuit = 'x_y2_selector_test'
 
-        //const test_suites: any[] = [
-            //{
-                //gx1: BigInt(4),
-                //gx1_sqrt: BigInt(2),
-                //gx2: BigInt(5),
-                //gx2_sqrt: BigInt(2),
-                //x1: BigInt(123),
-                //x2: BigInt(456),
-            //},
-            //{
-                //gx1: BigInt(5),
-                //gx1_sqrt: BigInt(2),
-                //gx2: BigInt(4),
-                //gx2_sqrt: BigInt(2),
-                //x1: BigInt(123),
-                //x2: BigInt(456),
-            //},
-        //]
-        //for (const suite of test_suites) {
-            //const s1 = suite.gx1_sqrt * suite.gx1_sqrt
-            //const s2 = suite.gx2_sqrt * suite.gx2_sqrt
+        const test_suites: any[] = [
+            {
+                gx1: BigInt(4),
+                gx1_sqrt: BigInt(2),
+                gx2: BigInt(5),
+                gx2_sqrt: BigInt(2),
+                x1: BigInt(123),
+                x2: BigInt(456),
+            },
+            {
+                gx1: BigInt(5),
+                gx1_sqrt: BigInt(2),
+                gx2: BigInt(4),
+                gx2_sqrt: BigInt(2),
+                x1: BigInt(123),
+                x2: BigInt(456),
+            },
+        ]
+        for (const suite of test_suites) {
+            const s1 = suite.gx1_sqrt * suite.gx1_sqrt
+            const s2 = suite.gx2_sqrt * suite.gx2_sqrt
 
-            //let x = 0
-            //if (s1 === suite.gx1) { x += 1 }
-            //if (s2 === suite.gx2) { x += 1 }
-            //expect(x).toEqual(1)
+            let x = 0
+            if (s1 === suite.gx1) { x += 1 }
+            if (s2 === suite.gx2) { x += 1 }
+            expect(x).toEqual(1)
 
-            //const expected_x = s1 === suite.gx1 ? suite.x1 : suite.x2
-            //const expected_y2 = s1 === suite.gx1 ? suite.gx1 : suite.gx2
-            //const expected_x_array = bigint_to_array(64, 4, expected_x)
-            //const expected_y2_array = bigint_to_array(64, 4, expected_y2)
-            //const circuitInputs = stringifyBigInts({
-                //gx1: bigint_to_array(64, 4, suite.gx1),
-                //gx1_sqrt: bigint_to_array(64, 4, suite.gx1_sqrt),
-                //gx2: bigint_to_array(64, 4, suite.gx2),
-                //gx2_sqrt: bigint_to_array(64, 4, suite.gx2_sqrt),
-                //x1: bigint_to_array(64, 4, suite.x1),
-                //x2: bigint_to_array(64, 4, suite.x2),
-            //})
-            //const witness = await genWitness(circuit, circuitInputs)
+            const expected_x = s1 === suite.gx1 ? suite.x1 : suite.x2
+            const expected_y2 = s1 === suite.gx1 ? suite.gx1 : suite.gx2
+            const expected_x_array = bigint_to_array(64, 4, expected_x)
+            const expected_y2_array = bigint_to_array(64, 4, expected_y2)
+            const circuitInputs = stringifyBigInts({
+                gx1: bigint_to_array(64, 4, suite.gx1),
+                gx1_sqrt: bigint_to_array(64, 4, suite.gx1_sqrt),
+                gx2: bigint_to_array(64, 4, suite.gx2),
+                gx2_sqrt: bigint_to_array(64, 4, suite.gx2_sqrt),
+                x1: bigint_to_array(64, 4, suite.x1),
+                x2: bigint_to_array(64, 4, suite.x2),
+            })
+            const witness = await genWitness(circuit, circuitInputs)
 
-            //for (let i = 0; i < 4; i ++) {
-                //const x = BigInt(await getSignalByName(circuit, witness, 'main.x[' + i.toString() + ']'))
-                //const y2 = BigInt(await getSignalByName(circuit, witness, 'main.y2[' + i.toString() + ']'))
-                //expect(x).toEqual(expected_x_array[i])
-                //expect(y2).toEqual(expected_y2_array[i])
-            //}
-        //}
-    //})
+            for (let i = 0; i < 4; i ++) {
+                const x = BigInt(await getSignalByName(circuit, witness, 'main.x[' + i.toString() + ']'))
+                const y2 = BigInt(await getSignalByName(circuit, witness, 'main.y2[' + i.toString() + ']'))
+                expect(x).toEqual(expected_x_array[i])
+                expect(y2).toEqual(expected_y2_array[i])
+            }
+        }
+    })
 
-    //it('Negate()', async() => {
-        //const circuit = 'negate_test'
-        //const a = BigInt(5)
-        //const expected_neg_a = p - BigInt(5)
-        //const expected_neg_a_array = bigint_to_array(64, 4, expected_neg_a)
+    it('Negate()', async() => {
+        const circuit = 'negate_test'
+        const a = BigInt(5)
+        const expected_neg_a = p - BigInt(5)
+        const expected_neg_a_array = bigint_to_array(64, 4, expected_neg_a)
 
-        //// Generate witness
-        //const circuitInputs = stringifyBigInts({
-            //'in': bigint_to_array(64, 4, a),
-        //})
-        //const witness = await genWitness(circuit, circuitInputs)
+        // Generate witness
+        const circuitInputs = stringifyBigInts({
+            'in': bigint_to_array(64, 4, a),
+        })
+        const witness = await genWitness(circuit, circuitInputs)
 
-        //for (let i = 0; i < 4; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            //expect(out).toEqual(expected_neg_a_array[i])
-        //}
-    //})
+        for (let i = 0; i < 4; i ++) {
+            const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            expect(out).toEqual(expected_neg_a_array[i])
+        }
+    })
 
     it('MapToCurve()', async() => {
         const circuit = 'map_to_curve_test'
