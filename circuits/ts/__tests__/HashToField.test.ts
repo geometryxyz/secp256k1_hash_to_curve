@@ -1,5 +1,4 @@
 jest.setTimeout(120000)
-const crypto = require('crypto')
 const ff = require('ffjavascript')
 const stringifyBigInts = ff.utils.stringifyBigInts
 import {

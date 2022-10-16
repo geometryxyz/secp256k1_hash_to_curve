@@ -16,7 +16,9 @@
         "test-pointAdd": "jest PointAdd.test.ts",
         "test-pointAdd-debug": "node --inspect-brk ./node_modules/.bin/jest PointAdd.test.ts",
         "test-hashToCurve": "jest HashToCurve.test.ts",
-        "test-hashToCurve-debug": "node --inspect-brk ./node_modules/.bin/jest HashToCurve.test.ts"
+        "test-hashToCurve-debug": "node --inspect-brk ./node_modules/.bin/jest HashToCurve.test.ts",
+        "test-sha256": "jest Sha256.test.ts",
+        "test-sha256-debug": "node --inspect-brk ./node_modules/.bin/jest Sha256.test.ts"
     },
     "author": "Koh Wei Jie",
     "license": "MIT",

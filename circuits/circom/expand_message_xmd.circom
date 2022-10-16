@@ -2,9 +2,6 @@ pragma circom 2.0.0;
 include "./constants.circom";
 include "../node_modules/circom-ecdsa/circuits/bigint.circom";
 include "../node_modules/circom-ecdsa/node_modules/circomlib/circuits/sha256/sha256.circom";
-/*include "../node_modules/circomlib/circuits/sha256/sha256.circom";*/
-/*include "../node_modules/circomlib/circuits/bitify.circom";*/
-/*include "../node_modules/circomlib/circuits/gates.circom";*/
 
 function calc_msg_prime_output_length(msg_length) {
     return msg_length + 64 + 2 + 50 + 1;
