@@ -19,6 +19,45 @@ import {
 } from '../generate_inputs'
 
 describe('Sha256', () => {
+    it('checkZeroPad_test (valid)', async () => {
+        const circuit = 'checkZeroPad_test'
+        const circuitInputs = stringifyBigInts({
+            in: [0, 2, 0, 0, 5],
+            start: 2,
+            end: 4,
+        })
+        const witness = await genWitness(circuit, circuitInputs)
+    })
+
+    it('checkZeroPad_test (invalid)', async () => {
+        const circuit = 'checkZeroPad_test'
+        try {
+            const circuitInputs = stringifyBigInts({
+                in: [0, 2, 1, 0, 5],
+                start: 2,
+                end: 4,
+            })
+            const witness = await genWitness(circuit, circuitInputs)
+            expect(false).toBeTruthy()
+        } catch (e) {
+            expect(true).toBeTruthy()
+        }
+
+        try {
+            const circuitInputs = stringifyBigInts({
+                in: [0, 2, 0, 1, 0],
+                start: 2,
+                end: 4,
+            })
+            const witness = await genWitness(circuit, circuitInputs)
+            expect(false).toBeTruthy()
+        } catch (e) {
+            expect(true).toBeTruthy()
+        }
+
+        expect.assertions(2)
+    })
+
     it('startsWith_test (valid)', async () => {
         const circuit = 'startsWith_test'
         const circuitInputs = stringifyBigInts({
@@ -57,6 +96,51 @@ describe('Sha256', () => {
         const witness = await genWitness(circuit, circuitInputs)
     })
 
+    it('Sha256Raw circuit', async () => {
+        const circuit = 'sha256raw_test'
+        const msg = 'abc'
+        const padded_bits = strToSha256PaddedBitArr(msg)
+        const circuitInputs = stringifyBigInts({
+            padded_bits: padded_bits.split(''),
+        })
+        const witness = await genWitness(circuit, circuitInputs)
+        let outBits = ''
+        for (let i = 0; i < 256; i ++) {
+            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            const out = BigInt(witness[i + 1])
+            outBits += out
+        }
+
+        const hash = crypto.createHash("sha256")
+            .update(Buffer.from(msg))
+            .digest('hex')
+
+        expect(BigInt('0b' + outBits).toString(16)).toEqual(hash)
+    })
+    
+    it('Sha256Hash circuit', async () => {
+        const circuit = 'sha256Hash_test'
+        const msg = 'abc'
+        const paddedIn = strToSha256PaddedBitArr(msg)
+        const circuitInputs = stringifyBigInts({
+            padded_bits: paddedIn.split(''),
+            msg: msgToSha256PaddedBitArr(msg).split(''),
+        })
+        const witness = await genWitness(circuit, circuitInputs)
+        let outBits = ''
+        for (let i = 0; i < 256; i ++) {
+            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            const out = BigInt(witness[i + 1])
+            outBits += out
+        }
+
+        const hash = crypto.createHash("sha256")
+            .update(Buffer.from(msg))
+            .digest('hex')
+
+        expect(BigInt('0b' + outBits).toString(16)).toEqual(hash)
+    })
+
     //it('padBits_3_test', async () => {
         //const circuit = 'padBits_3_test'
         //const msg = '123'
@@ -93,47 +177,5 @@ describe('Sha256', () => {
             //outBits += out
         //}
         //expect(outBits).toEqual(strToSha256PaddedBitArr(msg))
-    //})
-
-    //it('Sha256Raw circuit', async () => {
-        //const circuit = 'sha256raw_test'
-        //const msg = 'abc'
-        //const paddedIn = strToSha256PaddedBitArr(msg)
-        //const circuitInputs = stringifyBigInts({
-            //paddedIn: paddedIn.split(''),
-        //})
-        //const witness = await genWitness(circuit, circuitInputs)
-        //let outBits = ''
-        //for (let i = 0; i < 256; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            //outBits += out
-        //}
-
-        //const hash = crypto.createHash("sha256")
-            //.update(Buffer.from(msg))
-            //.digest('hex')
-
-        //expect(BigInt('0b' + outBits).toString(16)).toEqual(hash)
-    //})
-    
-    //// TODO: deprecate this
-    //it('Sha256Hash circuit', async () => {
-        //const circuit = 'sha256Hash_test'
-        //const msg = 'abc'
-        //const circuitInputs = stringifyBigInts({
-            //msg: str_to_array(msg),
-        //})
-        //const witness = await genWitness(circuit, circuitInputs)
-        //let outBits = ''
-        //for (let i = 0; i < 256; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            //outBits += out
-        //}
-
-        //const hash = crypto.createHash("sha256")
-            //.update(Buffer.from(msg))
-            //.digest('hex')
-
-        //expect(BigInt('0b' + outBits).toString(16)).toEqual(hash)
     //})
 })
