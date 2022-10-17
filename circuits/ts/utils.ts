@@ -40,14 +40,7 @@ const buffer2bitArray = (b: Buffer): number[] => {
     return res
 }
 
-/*
- * The SHA256 hash function accepts a plaintext (`str`) and its first operation
- * is to pad it. RFC4634, section 4.1 describes how this is done.
- */
-const strToPaddedBytes = (str: string): number[] => {
-    // Convert the input string to a buffer
-    const buf = Buffer.from(str, 'utf8')
-
+const bufToPaddedBytes = (buf: Buffer): number[] => {
     // Convert the buffer to bits
     const result: number[] = buffer2bitArray(buf)
     const len = result.length
@@ -81,6 +74,17 @@ const strToPaddedBytes = (str: string): number[] => {
         p.push(b)
     }
     return p
+}
+
+/*
+ * The SHA256 hash function accepts a plaintext (`str`) and its first operation
+ * is to pad it. RFC4634, section 4.1 describes how this is done.
+ */
+const strToPaddedBytes = (str: string): number[] => {
+    // Convert the input string to a buffer
+    const buf = Buffer.from(str, 'utf8')
+    return bufToPaddedBytes(buf)
+
 }
 
 /*
@@ -147,6 +151,7 @@ export {
     sgn0,
     buffer2bitArray,
     strToPaddedBytes,
+    bufToPaddedBytes,
     strToSha256PaddedBitArr,
     bufToSha256PaddedBitArr,
     msgToSha256PaddedBitArr,

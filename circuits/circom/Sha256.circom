@@ -1,4 +1,6 @@
 pragma circom 2.0.0;
+include "./calculateTotal.circom";
+include "./selector.circom";
 include "../node_modules/circom-ecdsa/node_modules/circomlib/circuits/sha256/sha256.circom";
 include "../node_modules/circom-ecdsa/node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circom-ecdsa/node_modules/circomlib/circuits/mux1.circom";
@@ -13,49 +15,10 @@ function calc_padded_bits_length(msg_bits_length) {
         total_bits_length += 512;
     }
 
-    if ((total_bits_length - s) % 512 > 448) {
+    if ((total_bits_length - s) % 512 < 64) {
         total_bits_length += 512;
     }
     return total_bits_length;
-}
-
-/*
- * Given a list of items and an index, output the item at the position denoted
- * by the index. The index must be less than the number of items.
- */
-template Selector(length) {
-    signal input in[length];
-    // Assumes that index < length
-    signal input index;
-    signal output out;
-
-    signal totals[length + 1];
-    totals[0] <== 0;
-
-    component eqs[length];
-    for (var i = 0; i < length; i ++) {
-        eqs[i] = IsEqual();
-        eqs[i].in[0] <== i;
-        eqs[i].in[1] <== index;
-        totals[i + 1] <== eqs[i].out * in[i] + totals[i];
-    }
-    out <== totals[length];
-}
-
-// Output the sum of the input signals.
-template CalculateTotal(n) {
-    assert(n > 0);
-    signal input in[n];
-    signal output out;
-
-    signal totals[n];
-    totals[0] <== in[0];
-
-    for (var i = 1; i < n; i ++) {
-        totals[i] <== totals[i - 1] + in[i];
-    }
-
-    out <== totals[n - 1];
 }
 
 // Checks that the first num_elements of signal array a are the same as that of
@@ -257,52 +220,6 @@ template Sha256Hash(padded_length) {
         out[i] <== sha256Raw.out[i];
     }
 }
-
-// Given a message, pad it according to RFC4634, section 4.1.
-/*template PadBits(msg_length) {*/
-    /*// This circuit isn't used in the secp256k1_hash_to_curve project, but may*/
-    /*// be useful for other projects.*/
-    /*var msg_bits_length = msg_length * 8;*/
-    /*var s = msg_bits_length + 1;*/
-    /*var total_bits_length = calc_padded_bits_length(msg_length);*/
-
-    /*signal input msg[msg_length];*/
-    /*signal output out[total_bits_length];*/
-
-    /*var k = total_bits_length - s;*/
-
-    /*// Step 1: output msg as bits*/
-    /*component step1_n2b[msg_length];*/
-    /*for (var i = 0; i < msg_length; i ++) {*/
-        /*step1_n2b[i] = Num2Bits(8);*/
-        /*step1_n2b[i].in <== msg[i];*/
-        /*for (var j = 0; j < 8; j ++) {*/
-            /*out[i * 8 + (7 - j)] <== step1_n2b[i].out[j];*/
-        /*}*/
-    /*}*/
-
-    /*// Step 2: append 1*/
-    /*out[msg_length * 8] <== 1;*/
-
-    /*// Step 3: append 0s*/
-    /*for (var i = s; i < total_bits_length - 64; i ++) {*/
-        /*out[i] <== 0;*/
-    /*}*/
-    
-    /*// Step 4: append msg_length as a 64-bit value*/
-    /*signal step4_length_in_binary[64];*/
-    /*component step4_n2b = Num2Bits(64);*/
-    /*step4_n2b.in <== msg_bits_length;*/
-    /*for (var i = 7; i >= 0; i --) {*/
-        /*for (var j = 0; j < 8; j ++) {*/
-            /*step4_length_in_binary[(7 - i) * 8 + j] <== step4_n2b.out[i * 8 + (7 - j)];*/
-        /*}*/
-    /*}*/
-
-    /*for (var i = 0; i < 64; i ++) {*/
-        /*out[total_bits_length - 64 + i] <== step4_length_in_binary[i];*/
-    /*}*/
-/*}*/
 
 // Output the SHA256 hash of the padded_bits. i.e. the input message is already
 // padded.

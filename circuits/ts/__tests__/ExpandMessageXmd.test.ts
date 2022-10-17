@@ -22,8 +22,7 @@ import {
 } from '../generate_inputs'
 import {
     buffer2bitArray,
-    strToPaddedBytes,
-    strToSha256PaddedBitArr,
+    bufToPaddedBytes,
     bufToSha256PaddedBitArr
 } from '../utils'
 import {
@@ -80,15 +79,6 @@ describe('ExpandMessageXmd', () => {
         BigInt('6383771510115767720'),
     ]
 
-    it('msg_prime to padded bits', async () => {
-        const msg = 'abc'
-        const msg_prime = gen_msg_prime(msg)
-        const buf = Buffer.from(msg_prime)
-        const paddedIn = bufToSha256PaddedBitArr(buf)
-        console.log(paddedIn)
-        console.log(paddedIn.length)
-    })
-
     //it('strxor test', async () => {
         //const a = [0, 10, 20, 30, 40, 50, 60, 70]
         //const b = [255, 254, 253, 252, 251, 250, 249, 248]
@@ -139,7 +129,8 @@ describe('ExpandMessageXmd', () => {
 
         //const bits: number[] = []
         //for (let i = 0; i < 256; i ++) {
-            //const out = Number(await getSignalByName(circuit, witness, 'main.hash[' + i.toString() + ']'))
+            ////const out = Number(await getSignalByName(circuit, witness, 'main.hash[' + i.toString() + ']'))
+            //const out = Number(witness[1 + i])
             //bits.push(out)
         //}
         //expect(bits.join('')).toEqual(hash_bits.join(''))
@@ -158,7 +149,8 @@ describe('ExpandMessageXmd', () => {
         //const b1_bits = buffer2bitArray(Buffer.from(hash))
         //const bits: number[] = []
         //for (let i = 0; i < 256; i ++) {
-            //const out = Number(await getSignalByName(circuit, witness, 'main.bi_bits[' + i.toString() + ']'))
+            ////const out = Number(await getSignalByName(circuit, witness, 'main.bi_bits[' + i.toString() + ']'))
+            //const out = Number(witness[1 + i])
             //bits.push(out)
         //}
         //expect(bits.join('')).toEqual(b1_bits.join(''))
@@ -177,7 +169,8 @@ describe('ExpandMessageXmd', () => {
         //const b2_bits = buffer2bitArray(Buffer.from(hash))
         //const bits: number[] = []
         //for (let i = 0; i < 256; i ++) {
-            //const out = Number(await getSignalByName(circuit, witness, 'main.bi_bits[' + i.toString() + ']'))
+            ////const out = Number(await getSignalByName(circuit, witness, 'main.bi_bits[' + i.toString() + ']'))
+            //const out = Number(witness[1 + i])
             //bits.push(out)
         //}
         //expect(bits.join('')).toEqual(b2_bits.join(''))
@@ -196,7 +189,8 @@ describe('ExpandMessageXmd', () => {
         //const b2_bits = buffer2bitArray(Buffer.from(hash))
         //const bits: number[] = []
         //for (let i = 0; i < 256; i ++) {
-            //const out = Number(await getSignalByName(circuit, witness, 'main.bi_bits[' + i.toString() + ']'))
+            ////const out = Number(await getSignalByName(circuit, witness, 'main.bi_bits[' + i.toString() + ']'))
+            //const out = Number(witness[1 + i])
             //bits.push(out)
         //}
         //expect(bits.join('')).toEqual(b2_bits.join(''))
@@ -210,7 +204,8 @@ describe('ExpandMessageXmd', () => {
 
         //const bytes: number[] = []
         //for (let i = 0; i < 96; i ++) {
-            //const out = Number(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            ////const out = Number(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            //const out = Number(witness[1 + i])
             //bytes.push(out)
         //}
 
@@ -220,4 +215,119 @@ describe('ExpandMessageXmd', () => {
             //expect(bytes[i]).toEqual(expected[i])
         //}
     //})
+
+    //it('ZeroSandwich (valid)', async () => {
+        //const circuit = 'zero_sandwich_test'
+        //const circuitInputs = stringifyBigInts({
+            //in: [0, 0, 0, 0, 5, 6, 0, 0],
+            //substring_length: 2,
+        //})
+
+        //const witness = await genWitness(circuit, circuitInputs)
+    //})
+
+    //it('ZeroSandwich (invalid)', async () => {
+        //const circuit = 'zero_sandwich_test'
+        //const circuitInputs = stringifyBigInts({
+            //in: [0, 0, 0, 0, 5, 6, 3, 0],
+            //substring_length: 2,
+        //})
+
+        //try {
+            //const witness = await genWitness(circuit, circuitInputs)
+            //expect(false).toBeTruthy()
+        //} catch {
+            //expect(true).toBeTruthy()
+        //}
+        //expect.assertions(1)
+    //})
+
+    //it('ZeroSandwich (invalid)', async () => {
+        //const circuit = 'zero_sandwich_test'
+        //const circuitInputs = stringifyBigInts({
+            //in: [0, 0, 0, 1, 5, 6, 0, 0],
+            //substring_length: 2,
+        //})
+
+        //try {
+            //const witness = await genWitness(circuit, circuitInputs)
+            //expect(false).toBeTruthy()
+        //} catch {
+            //expect(true).toBeTruthy()
+        //}
+        //expect.assertions(1)
+    //})
+ 
+    //it('VerifyMsgPrime', async () => {
+        //const circuit = 'verify_msg_prime_test'
+        //const msg_prime = gen_msg_prime(msg)
+        //const b = bufToPaddedBytes(Buffer.from(msg_prime))
+        ////console.log(msg_prime.length)
+        ////console.log(Buffer.from(expected_msg_prime).toString('hex'))
+        ////console.log(Buffer.from(b).toString('hex'))
+
+        //let offset_msg_buf = Buffer.alloc(msg_prime.length)
+        //for (let i = 64; i < 64 + msg.length; i ++) {
+            //offset_msg_buf[i] = Buffer.from(msg[i - 64])[0]
+        //}
+        //let offset_msg: Number[] = []
+        //for (let i = 0; i < offset_msg_buf.length; i ++) {
+            //offset_msg.push(Number(offset_msg_buf[i]))
+        //}
+
+        //const circuitInputs = stringifyBigInts({
+            //msg_prime,
+            //offset_msg,
+            //msg_length: msg.length 
+        //})
+        //const witness = await genWitness(circuit, circuitInputs)
+    //})
+
+    it('ExpandMessageXmd2', async () => {
+        const circuit = 'expand_msg_xmd2_test'
+        const msg_prime = gen_msg_prime(msg)
+        const padded_msg_prime = bufToPaddedBytes(Buffer.from(msg_prime))
+
+        let offset_msg_buf = Buffer.alloc(padded_msg_prime.length)
+        for (let i = 64; i < 64 + msg.length; i ++) {
+            offset_msg_buf[i] = Buffer.from(msg[i - 64])[0]
+        }
+        let offset_msg: Number[] = []
+        for (let i = 0; i < offset_msg_buf.length; i ++) {
+            offset_msg.push(Number(offset_msg_buf[i]))
+        }
+
+        const circuitInputs = stringifyBigInts({
+            msg_prime: padded_msg_prime,
+            offset_msg,
+            msg_length: msg.length,
+            padded_msg_prime: bufToPaddedBytes(Buffer.from(msg_prime)),
+        })
+        const witness = await genWitness(circuit, circuitInputs)
+
+        //const hash = gen_b0(expected_msg_prime)
+
+        //const hash_bits = buffer2bitArray(Buffer.from(hash))
+
+        //const bits: number[] = []
+        //for (let i = 0; i < 256; i ++) {
+            ////const out = Number(await getSignalByName(circuit, witness, 'main.hash[' + i.toString() + ']'))
+            //const out = Number(witness[1 + i])
+            //bits.push(out)
+        //}
+        //expect(bits.join('')).toEqual(hash_bits.join(''))
+ 
+        const bytes: number[] = []
+        for (let i = 0; i < 96; i ++) {
+            //const out = Number(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
+            const out = Number(witness[1 + i])
+            bytes.push(out)
+        }
+
+        const expected = expand_msg_xmd(msg)
+        expect(expected.length).toEqual(bytes.length)
+        for (let i = 0; i < 96; i ++) {
+            expect(bytes[i]).toEqual(expected[i])
+        }
+    })
 })

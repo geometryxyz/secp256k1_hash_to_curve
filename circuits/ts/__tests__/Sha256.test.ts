@@ -140,42 +140,4 @@ describe('Sha256', () => {
 
         expect(BigInt('0b' + outBits).toString(16)).toEqual(hash)
     })
-
-    //it('padBits_3_test', async () => {
-        //const circuit = 'padBits_3_test'
-        //const msg = '123'
-        //const expected = strToSha256PaddedBitArr(msg)
-        //const circuitInputs = stringifyBigInts({
-            //msg: str_to_array(msg),
-        //})
-        //const witness = await genWitness(circuit, circuitInputs)
-        //let outBits = ''
-        //for (let i = 0; i < expected.length; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            //outBits += out
-        //}
-        //expect(outBits).toEqual(strToSha256PaddedBitArr(msg))
-    //})
-
-    //it('padBits_63_test', async () => {
-        //const circuit = 'padBits_63_test'
-        //let msg = ''
-        //for (let i = 0; i < 63; i ++) {
-            //msg += 'x'
-        //}
-
-        //const expected = strToSha256PaddedBitArr(msg)
-        //const circuitInputs = stringifyBigInts({
-            //msg: str_to_array(msg),
-        //})
-
-        //const witness = await genWitness(circuit, circuitInputs)
-
-        //let outBits = ''
-        //for (let i = 0; i < expected.length; i ++) {
-            //const out = BigInt(await getSignalByName(circuit, witness, 'main.out[' + i.toString() + ']'))
-            //outBits += out
-        //}
-        //expect(outBits).toEqual(strToSha256PaddedBitArr(msg))
-    //})
 })
