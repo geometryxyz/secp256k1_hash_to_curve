@@ -21,7 +21,8 @@ located at `circuits/circom/hash_to_curve.circom`. It implements the
 
 ## Constraints
 
-A circuit parameterised for a message with length 3 has will have 2217282
+A circuit parameterised for a message with length 3 will have 2217282
+constraints, and a circuit for a message of length 64 will have 2218762
 constraints. In practice, messages will be longer, and the number of
 constraints will be accordingly larger. The bulk of the constraints come from
 the `hash-to-field` circuit which involves multiple SHA256 hashes.
