@@ -91,21 +91,12 @@ template Sgn0() {
     signal val;
     val <== in[0];
 
-    signal r;
-    r <-- val % 2;
-
-    var q = val \ 2;
+    signal r <-- val % 2;
+    signal q <-- val \ 2;
 
     // Ensure that r is 0 xor 1
     component is0 = IsEqual();
-    is0.in[0] <== r;
-    is0.in[1] <== 0;
-
-    component is1 = IsEqual();
-    is1.in[0] <== r;
-    is1.in[1] <== 1;
-
-    is0.out + is1.out === 1;
+    r * (r - 1) === 0;
 
     // Ensure that q * 2 + r equals the input
     q * 2 + r === val;
