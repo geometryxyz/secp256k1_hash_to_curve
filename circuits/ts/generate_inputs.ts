@@ -16,7 +16,7 @@ import { sgn0, bigint_to_array } from './utils'
 import { iso_map } from './iso_map'
 import { Point } from '@noble/secp256k1';
 
-const str_to_array = (msg: string): any => {
+const str_to_array = (msg: string): number[] => {
     return msg.split('').map((x) => Buffer.from(x)[0])
 }
 
@@ -37,8 +37,7 @@ const strxor = (a: number[], b: number[]): number[] => {
     return result
 }
 
-const gen_msg_prime = (msg: string): any => {
-    const msg_array = str_to_array(msg)
+const gen_msg_prime = (msg_array: number[]): any => {
     return z_pad.concat(msg_array).concat(lib_str).concat([0]).concat(dst_prime)
 }
 
@@ -66,8 +65,8 @@ const gen_b3 = (b0: number[], b2: number[]) => {
     return buf_to_array(hash)
 }
 
-const expand_msg_xmd = (msg: string): any => {
-    const msg_prime = gen_msg_prime(msg)
+const expand_msg_xmd = (msg_array: number[]): any => {
+    const msg_prime = gen_msg_prime(msg_array)
     const b0 = gen_b0(msg_prime)
     const b1 = gen_b1(b0)
     const b2 = gen_b2(b0, b1)
@@ -154,6 +153,11 @@ const map_to_curve = (u: bigint) => {
 }
 
 const generate_inputs = (msg: string): any => {
+    const msg_array = str_to_array(msg)
+    return generate_inputs_from_array(msg_array)
+}
+
+const generate_inputs_from_array = (msg: number[]): any => {
     const uniform_bytes = expand_msg_xmd(msg)
 
     const u0_bytes = uniform_bytes.slice(0, 48)
@@ -166,7 +170,7 @@ const generate_inputs = (msg: string): any => {
     const q1 = map_to_curve(u1)
 
     return {
-        msg: str_to_array(msg),
+        msg: msg,
         q0_gx1_sqrt: bigint_to_array(64, 4, q0.gx1_sqrt),
         q0_gx2_sqrt: bigint_to_array(64, 4, q0.gx2_sqrt),
         q0_y_pos: bigint_to_array(64, 4, q0.y_pos),

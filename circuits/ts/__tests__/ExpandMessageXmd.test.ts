@@ -30,7 +30,7 @@ import {
 
 describe('ExpandMessageXmd', () => {
     const msg = 'abc'
-    const expected_msg_prime = gen_msg_prime(msg)
+    const expected_msg_prime = gen_msg_prime(str_to_array(msg))
     const expected_msg_prime2 = [
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -285,7 +285,7 @@ describe('ExpandMessageXmd', () => {
 
     it('ExpandMessageXmd2', async () => {
         const circuit = 'expand_msg_xmd2_test'
-        const msg_prime = gen_msg_prime(msg)
+        const msg_prime = gen_msg_prime(str_to_array(msg))
         const padded_msg_prime = bufToPaddedBytes(Buffer.from(msg_prime))
 
         let offset_msg_buf = Buffer.alloc(padded_msg_prime.length)
@@ -324,7 +324,7 @@ describe('ExpandMessageXmd', () => {
             bytes.push(out)
         }
 
-        const expected = expand_msg_xmd(msg)
+        const expected = expand_msg_xmd(str_to_array(msg))
         expect(expected.length).toEqual(bytes.length)
         for (let i = 0; i < 96; i ++) {
             expect(bytes[i]).toEqual(expected[i])
