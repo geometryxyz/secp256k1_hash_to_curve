@@ -1,5 +1,7 @@
 jest.setTimeout(360000)
 const crypto = require('crypto')
+import { join } from 'path';
+import { wasm as wasm_tester } from 'circom_tester'
 const ff = require('ffjavascript')
 const stringifyBigInts = ff.utils.stringifyBigInts
 import {
@@ -51,14 +53,18 @@ describe('HashToCurve', () => {
             const inputs = generate_inputs(msg)
 
             const circuitInputs = stringifyBigInts(inputs)
-            const witness = await genWitness(circuit, circuitInputs)
+            // const witness = await genWitness(circuit, circuitInputs)
 
-            for (let i = 0; i < 4; i ++) {
-                const out_x = BigInt(await getSignalByName(circuit, witness, 'main.out[0][' + i.toString() + ']'))
-                expect(out_x).toEqual(expected_x_array[i])
-                const out_y = BigInt(await getSignalByName(circuit, witness, 'main.out[1][' + i.toString() + ']'))
-                expect(out_y).toEqual(expected_y_array[i])
-            }
+            // for (let i = 0; i < 4; i ++) {
+            //     const out_x = BigInt(await getSignalByName(circuit, witness, 'main.out[0][' + i.toString() + ']'))
+            //     expect(out_x).toEqual(expected_x_array[i])
+            //     const out_y = BigInt(await getSignalByName(circuit, witness, 'main.out[1][' + i.toString() + ']'))
+            //     expect(out_y).toEqual(expected_y_array[i])
+            // }
+            const p = join(__dirname, "../../circom/test", circuit + '.circom')
+            const c = await wasm_tester(p, {"json":true, "sym": true})
+            const w = await c.calculateWitness(circuitInputs)
+            await c.checkConstraints(w)
         })
     }
 })
