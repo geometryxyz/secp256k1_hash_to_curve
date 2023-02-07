@@ -95,7 +95,6 @@ template Sgn0() {
     signal q <-- val \ 2;
 
     // Ensure that r is 0 xor 1
-    component is0 = IsEqual();
     r * (r - 1) === 0;
 
     // Ensure that q * 2 + r equals the input
