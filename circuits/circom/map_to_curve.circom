@@ -100,6 +100,10 @@ template Sgn0() {
     // Ensure that q * 2 + r equals the input
     q * 2 + r === val;
 
+    component num2bits = Num2Bits(64);
+    num2bits.in <== in[0];
+    r === num2bits.out[0];
+
     // If the remainder is 0, output 0; if it is 1, output 1
     out <== r;
 }
