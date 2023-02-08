@@ -197,6 +197,7 @@ export {
     gen_b2,
     gen_b3,
     generate_inputs,
+    generate_inputs_from_array,
     strxor,
     str_to_array,
     expand_msg_xmd,
