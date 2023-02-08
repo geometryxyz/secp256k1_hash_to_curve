@@ -14,6 +14,7 @@ import {
     map_to_curve,
     expand_msg_xmd,
     generate_inputs,
+    str_to_array,
 } from '../generate_inputs'
 
 const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F')
@@ -414,7 +415,7 @@ describe('MapToCurve', () => {
     it('map_to_curve for abcdef0123456789 u1', async () => {
         const circuit = 'map_to_curve_test'
         const msg = 'abcdef0123456789'
-        const uniform_bytes = expand_msg_xmd(msg)
+        const uniform_bytes = expand_msg_xmd(str_to_array(msg))
 
         //const u0_bytes = uniform_bytes.slice(0, 48)
         //const u0 = ff.utils.beBuff2int(Buffer.from(u0_bytes)) % p
