@@ -185,7 +185,7 @@ template VerifyPaddedBits(padded_length) {
 // Ensures that the input is either 0 or 1
 template IsBinary() {
     signal input in;
-    a * (a - 1) === 0;
+    in * (in - 1) === 0;
 }
 
 // Outputs the SHA256 hash of padded_bits.
