@@ -17,16 +17,15 @@ template CMov() {
     signal input c;
     signal output out[4];
 
-    component mux[4];
+    component mux = MultiMux1(4);
     for (var i = 0; i < 4; i ++) {
-        mux[i] = Mux1();
-        mux[i].c[0] <== a[i];
-        mux[i].c[1] <== b[i];
-        mux[i].s <== c;
+        mux.c[0][i] <== a[i];
+        mux.c[1][i] <== b[i];
     }
+    mux.s <== c;
 
     for (var i = 0; i < 4; i ++) {
-        out[i] <== mux[i].out;
+        out[i] <== mux.out[i];
     }
 }
 
