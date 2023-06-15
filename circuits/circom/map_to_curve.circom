@@ -169,6 +169,7 @@ template XY2Selector() {
     }
 }
 
+// Each step corresponds to a line in the reference implementation here https://github.com/cfrg/draft-irtf-cfrg-hash-to-curve/blob/eb001eaea0f49066dad611a4c7cb2749f167b97e/poc/sswu_generic.sage#L76-L97
 template MapToCurve() {
     signal input u[4];
     signal input gx1_sqrt[4];
