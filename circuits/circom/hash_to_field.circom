@@ -2,6 +2,7 @@ pragma circom 2.0.0;
 include "./constants.circom";
 include "./expand_message_xmd.circom";
 
+// Spec https://www.ietf.org/archive/id/draft-irtf-cfrg-hash-to-curve-13.html#name-hash_to_field-implementatio
 template HashToField(msg_length) {
     signal input msg[msg_length];
     signal output u[2][4];
@@ -26,6 +27,9 @@ template HashToField(msg_length) {
 }
 
 // Converts a 48-byte array into a 4-register BigInt modulo the secp256k1 prime
+//
+// 48 bytes has enough entropy so that the distribution of points is close
+// enough to uniform for 128 bit security: L = ceil((ceil(log2(p)) + k) / 8) = 48
 template BytesToRegisters() {
     signal input bytes[48];
     signal output out[4];
